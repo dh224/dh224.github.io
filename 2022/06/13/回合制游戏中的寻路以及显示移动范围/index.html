@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+
+    
+
+    <!-- 渲染优化 -->
+    <meta name="renderer" content="webkit">
+    <meta name="force-rendering" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="HandheldFriendly" content="True" >
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!--icon-->
+
+    
+        <link rel="shortcut icon" href="/ico.ico">
+    
+    
+        <link rel="icon" type="image/png" sizes="16x16" href="/smallicon.png">
+    
+    
+        <link rel="icon" type="image/png" sizes="32x32" href="/midicon.png">
+    
+    
+        <link rel="apple-touch-icon" sizes="180x180" href="/ico.ico">
+    
+    
+        <link rel="mask-icon" href="/ico.ico">
+    
+
+
+    <!-- meta -->
+
+
+<title>回合制游戏中的寻路以及显示移动范围 | 南方真理会</title>
+
+
+    <meta name="keywords" content="Unity, A*, BFS">
+
+
+
+
+    <!-- OpenGraph -->
+ 
+    <meta name="description" content="这几天看了Making a Turn Based Strategy Game in Unity的视频，打算尝试做一个回合制的游戏。这应该是我的第一款全程独立制作（指的是自己思考代码结构，而非照着视频抄写游戏），因此预计会花上更长的时间去准备和沉淀，但是希望能够最终完成。我目前的想法是做成一个类似于陷阵之志的3D回合制策略游戏。虽然我原本的想法远非如此，但是考虑到自己的代码能力，还是决定不要眼高手低">
+<meta property="og:type" content="article">
+<meta property="og:title" content="回合制游戏中的寻路以及显示移动范围">
+<meta property="og:url" content="http://dh224.github.io/2022/06/13/%E5%9B%9E%E5%90%88%E5%88%B6%E6%B8%B8%E6%88%8F%E4%B8%AD%E7%9A%84%E5%AF%BB%E8%B7%AF%E4%BB%A5%E5%8F%8A%E6%98%BE%E7%A4%BA%E7%A7%BB%E5%8A%A8%E8%8C%83%E5%9B%B4/index.html">
+<meta property="og:site_name" content="南方真理会">
+<meta property="og:description" content="这几天看了Making a Turn Based Strategy Game in Unity的视频，打算尝试做一个回合制的游戏。这应该是我的第一款全程独立制作（指的是自己思考代码结构，而非照着视频抄写游戏），因此预计会花上更长的时间去准备和沉淀，但是希望能够最终完成。我目前的想法是做成一个类似于陷阵之志的3D回合制策略游戏。虽然我原本的想法远非如此，但是考虑到自己的代码能力，还是决定不要眼高手低">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://satt.oss-cn-hangzhou.aliyuncs.com/img/20220613220130.png">
+<meta property="article:published_time" content="2022-06-13T21:43:46.000Z">
+<meta property="article:modified_time" content="2023-05-09T11:04:03.044Z">
+<meta property="article:author" content="dh">
+<meta property="article:tag" content="Unity">
+<meta property="article:tag" content="A*">
+<meta property="article:tag" content="BFS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://satt.oss-cn-hangzhou.aliyuncs.com/img/20220613220130.png">
+
+
+    
+<link rel="stylesheet" href="/style.css">
+ 
+
+    
+    
+        <link rel="stylesheet" id="hl-default-theme" href="/css/highlight/default.css" media="none">
+        
+            <link rel="stylesheet" id="hl-dark-theme" href="/css/highlight/dark.css" media="none">
+        
+    
+
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/style/dark.css">
+
+    
+<script src="/js/darkmode.js"></script>
+
+
+
+     
+
+    <!-- custom head -->
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+    <body>
+        <div id="app">
+            <header class="header">
+    <div class="header__left">
+        <a href="/" class="button">
+            <span class="logo__text">南方真理会</span>
+        </a>
+    </div>
+    <div class="header__right">
+        
+            <div class="navbar__menus">
+                
+                    <a href="/" class="navbar-menu button">首页</a>
+                
+                    <a href="/tags/" class="navbar-menu button">标签</a>
+                
+                    <a href="/archives/" class="navbar-menu button">归档</a>
+                
+            </div>
+        
+        
+        
+
+        
+        
+    <a href="javaScript:void(0);" id="btn-toggle-dark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </a>
+
+
+        
+
+        
+            <a class="dropdown-icon button" id="btn-dropdown" tabindex="0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width='24' height='24' fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path fill="currentColor" d="M3.314,4.8h13.372c0.41,0,0.743-0.333,0.743-0.743c0-0.41-0.333-0.743-0.743-0.743H3.314c-0.41,0-0.743,0.333-0.743,0.743C2.571,4.467,2.904,4.8,3.314,4.8z M16.686,15.2H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,15.2,16.686,15.2z M16.686,9.257H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,9.257,16.686,9.257z"></path></svg></a>
+            <div class="dropdown-menus" id="dropdown-menus">
+                
+                    <a href="/" class="dropdown-menu button">首页</a>
+                
+                    <a href="/tags/" class="dropdown-menu button">标签</a>
+                
+                    <a href="/archives/" class="dropdown-menu button">归档</a>
+                
+            </div>
+        
+    </div>
+</header>
+
+
+            <main class="main">
+    
+
+<div class="post-title">
+    <h1 class="post-title__text">
+        回合制游戏中的寻路以及显示移动范围
+    </h1>
+    <div class="post-title__meta">
+        <a href="/archives/2022/06/" class="post-meta__date button">2022-06-13</a>
+        
+ 
+        
+    
+    
+
+
+ 
+
+ 
+    </div>
+</div>
+
+
+    <aside class="post-side">
+        <div class="post-side__toc">
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#A-%E7%AE%97%E6%B3%95"><span class="toc-text">A*算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#class%E9%87%8D%E8%BD%BD-%E6%93%8D%E4%BD%9C%E7%AC%A6%E9%81%87%E5%88%B0%E7%9A%84%E6%80%AA%E4%BA%8B"><span class="toc-text">class重载&#x3D;&#x3D;操作符遇到的怪事</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8BFS%E6%98%BE%E7%A4%BA%E7%A7%BB%E5%8A%A8%E8%8C%83%E5%9B%B4"><span class="toc-text">使用BFS显示移动范围</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%98%BE%E7%A4%BA%E5%89%8D%E8%BF%9B%E8%B7%AF%E7%BA%BF"><span class="toc-text">显示前进路线</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%92%E8%89%B2%E6%8C%89%E7%85%A7%E5%89%8D%E8%BF%9B%E7%9A%84%E8%B7%AF%E7%BA%BF%E8%BF%9B%E8%A1%8C%E7%A7%BB%E5%8A%A8"><span class="toc-text">角色按照前进的路线进行移动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Unit%E5%91%BD%E4%BB%A4%E7%9A%84%E5%9B%9E%E9%80%80%E4%BB%A5%E5%8F%8A%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F"><span class="toc-text">Unit命令的回退以及命令模式</span></a></li></ol>
+        </div>
+    </aside>
+    <a class="btn-toc button" id="btn-toc" tabindex="0">
+        <svg viewBox="0 0 1024 1024" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+            <path d="M128 256h64V192H128zM320 256h576V192H320zM128 544h64v-64H128zM320 544h576v-64H320zM128 832h64v-64H128zM320 832h576v-64H320z" fill="currentColor"></path>
+        </svg>
+    </a>
+    <div class="toc-menus" id="toc-menus">
+        <div class="toc-title">Article Directory</div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#A-%E7%AE%97%E6%B3%95"><span class="toc-text">A*算法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#class%E9%87%8D%E8%BD%BD-%E6%93%8D%E4%BD%9C%E7%AC%A6%E9%81%87%E5%88%B0%E7%9A%84%E6%80%AA%E4%BA%8B"><span class="toc-text">class重载&#x3D;&#x3D;操作符遇到的怪事</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8BFS%E6%98%BE%E7%A4%BA%E7%A7%BB%E5%8A%A8%E8%8C%83%E5%9B%B4"><span class="toc-text">使用BFS显示移动范围</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%98%BE%E7%A4%BA%E5%89%8D%E8%BF%9B%E8%B7%AF%E7%BA%BF"><span class="toc-text">显示前进路线</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%92%E8%89%B2%E6%8C%89%E7%85%A7%E5%89%8D%E8%BF%9B%E7%9A%84%E8%B7%AF%E7%BA%BF%E8%BF%9B%E8%A1%8C%E7%A7%BB%E5%8A%A8"><span class="toc-text">角色按照前进的路线进行移动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Unit%E5%91%BD%E4%BB%A4%E7%9A%84%E5%9B%9E%E9%80%80%E4%BB%A5%E5%8F%8A%E5%91%BD%E4%BB%A4%E6%A8%A1%E5%BC%8F"><span class="toc-text">Unit命令的回退以及命令模式</span></a></li></ol>
+    </div>
+
+
+<article class="post post__with-toc content-card">
+    <div class="post__header">
+    
+        <div class="post-thumbnail" style="background-image: url('https://satt.oss-cn-hangzhou.aliyuncs.com/img/20220613220130.png');"></div>
+    
+
+    <div class="post__expire" id="post-expired-notify">
+        <p>
+            This article was last updated on &lt;span id=&#34;expire-date&#34;&gt;&lt;/span&gt; days ago, the information described in the article may be outdated.
+        </p>
+    </div>
+    <script>
+        (() => {
+            var update = Date.parse("2023-05-09"),
+                date = new Date(),
+                now = date.getTime(),
+                expire = now - update,
+                expire_days = Math.floor(expire/(24*3600*1000));
+            if (expire_days >= 120) {
+                document.querySelectorAll('#expire-date')[0].innerHTML = expire_days;
+                document.querySelectorAll('#post-expired-notify')[0].style.display = 'block';
+            }
+        })();
+    </script>
+</div>
+    <div class="post__content">
+        <p>这几天看了<a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=MNSQWPhalGQ">Making a Turn Based Strategy Game in Unity</a>的视频，打算尝试做一个回合制的游戏。这应该是我的第一款全程独立制作（指的是自己思考代码结构，而非照着视频<code>抄写</code>游戏），因此预计会花上更长的时间去准备和沉淀，但是希望能够最终完成。我目前的想法是做成一个类似于<a target="_blank" rel="noopener" href="https://store.steampowered.com/app/590380/Into_the_Breach/">陷阵之志</a>的3D回合制策略游戏。虽然我原本的想法远非如此，但是考虑到自己的代码能力，还是决定不要眼高手低了。接下去我会记录下游戏开发中一些值得记录的点子，基本会按照开发的顺序来记录（可能在完成后会进行整理）。预计的开发时间（包括学习时间）在3个月左右。</p>
+<h2 id="A-算法"><a href="#A-算法" class="headerlink" title="A*算法"></a>A*算法</h2><p>尽管此前已经写过<a target="_blank" rel="noopener" href="https://studyallthetime.com/2021/10/07/A-%E7%AE%97%E6%B3%95%E7%9A%84%E5%AD%A6%E4%B9%A0/">A*算法</a>了，但是实际创建的时候还是遇到了一些问题。我发现C#中居然没有自带的优先队列。由于不想过度优化（实际上是懒惰），我就放弃了手写一个的打算(希望日后能补上).由于原理不难，我就不贴代码了。还有一个发现就是有关带权A*算法的问题。做一个简单的总结.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fScore[neighbour] = tentative_gScore + w * h_Manhattan(neighbour.x, neighbour.y, targetX, targetY);</span><br></pre></td></tr></table></figure>
+<p>此时，当w = 0时，A*为dijkstra算法。当0 &lt; w &lt; 1时候，A*算法更像会不注重速度，而是在乎准确性。当w&gt;1的时候，此时的最终路径则不一定是最优的。当w远大于h的时候，A*就会接近于BFS.</p>
+<h2 id="class重载-操作符遇到的怪事"><a href="#class重载-操作符遇到的怪事" class="headerlink" title="class重载==操作符遇到的怪事"></a>class重载==操作符遇到的怪事</h2><p>当我试图给class重载<code>==</code>以及<code>!=</code>操作符遇到的一个奇怪的问题.在一开始, 我直接将代码写成如下形式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public static bool operator ==(Node left, Node right)</span><br><span class="line">&#123;</span><br><span class="line">    if (left.x == right.x &amp;&amp; left.y == right.y)</span><br><span class="line">    &#123;</span><br><span class="line">        return true;</span><br><span class="line">    &#125;</span><br><span class="line">    else return false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是这种写法，在我使用类似 <code>node == null</code>进行判断的时候就会爆空引用。这是合理的，因为此时我的right必然是null。因此，我对原有代码稍作修改，如下所示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">public static bool operator ==(Node left, Node right)</span><br><span class="line">&#123;</span><br><span class="line">    </span><br><span class="line">    if (left == null)</span><br><span class="line">    &#123;</span><br><span class="line">        if (right == null) return true;</span><br><span class="line">        else return false;</span><br><span class="line">    &#125;</span><br><span class="line">    else</span><br><span class="line">    &#123;</span><br><span class="line">        if (right == null) return false;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            if (left.x == right.x &amp;&amp; left.y == right.y)</span><br><span class="line">            &#123;</span><br><span class="line">                return true;</span><br><span class="line">            &#125;</span><br><span class="line">            else return false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>写完后我立刻就发现了问题，显然<code>left == null</code> 这句会循环调用我定义的操作符<code>==</code>,运行后也果然爆栈了。一番思索过后，我放弃了解决。不过我发现有人也遇到了我类似的问题<a target="_blank" rel="noopener" href="https://blog.csdn.net/poson/article/details/2578362?utm_source=blogxgwz4">一个解决方法</a>,虽然使用equals的方法并不优美，但好像也只能这么做了。另一个解决方法是使用<code>node is object</code>语句判定。因为所有的类型都继承自object，这种做法显然更加合理.</p>
+<h2 id="使用BFS显示移动范围"><a href="#使用BFS显示移动范围" class="headerlink" title="使用BFS显示移动范围"></a>使用BFS显示移动范围</h2><p>接下去我来介绍一下如何显示合理的移动范围.Node类的定义以及主要逻辑代码如下所示.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">public class Node </span><br><span class="line">&#123;</span><br><span class="line">    public List&lt;Node&gt; neighbours;</span><br><span class="line">    public int x;</span><br><span class="line">    public int y;</span><br><span class="line">    public TileType nodeType;</span><br><span class="line">    public bool isVisited_movementRange;</span><br><span class="line">    public float remainMovement;</span><br><span class="line">    public float DistanceTo(Node n)</span><br><span class="line">    &#123;</span><br><span class="line">        return Vector2.Distance(new Vector2(this.x, this.y), new Vector2(n.x, n.y));</span><br><span class="line">    &#125;</span><br><span class="line">    public Node(int x, int y)</span><br><span class="line">    &#123;</span><br><span class="line">        this.x = x;</span><br><span class="line">        this.y = y;</span><br><span class="line">        this.neighbours = new List&lt;Node&gt;();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">void showMovementRange(int x1, int y1)</span><br><span class="line">&#123;</span><br><span class="line">    List&lt;Node&gt; moveRange = new List&lt;Node&gt;();</span><br><span class="line">    for (int x = 0; x &lt; mapSizeX; x++)</span><br><span class="line">    &#123;</span><br><span class="line">        for (int y = 0; y &lt; mapSizeY; y++)</span><br><span class="line">        &#123;</span><br><span class="line">            graph[x, y].isVisited_movementRange = false;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    Node root = graph[x1, y1];</span><br><span class="line">    root.isVisited_movementRange = true;</span><br><span class="line">    root.remainMovement = 5;</span><br><span class="line">    Queue&lt;Node&gt; Q = new Queue&lt;Node&gt;();</span><br><span class="line">    Q.Enqueue(root);</span><br><span class="line">    while (Q.Count &gt; 0)</span><br><span class="line">    &#123;</span><br><span class="line">        Node v = Q.Dequeue();</span><br><span class="line">        foreach (var vn in v.neighbours)</span><br><span class="line">        &#123;</span><br><span class="line">            if (vn.isVisited_movementRange)</span><br><span class="line">                continue;</span><br><span class="line">            if (v.remainMovement - (1 + vn.nodeType.extraCost) &gt;= 0)</span><br><span class="line">            &#123;</span><br><span class="line">                vn.remainMovement = v.remainMovement - (1 + vn.nodeType.extraCost);</span><br><span class="line">                vn.isVisited_movementRange = true;</span><br><span class="line">                moveRange.Add(vn);</span><br><span class="line">                Q.Enqueue(vn);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    foreach (var move in moveRange)</span><br><span class="line">    &#123;</span><br><span class="line">        Debug.Log(move.x + &quot;,&quot; +move.y);</span><br><span class="line">    &#125;</span><br><span class="line">    MapUI.instance.showMovementRange(moveRange);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/20220613220130.png" alt="运动力为5时候的可移动范围"></p>
+<center>移动力为5时的移动范围(蓝色方块)</center>
+
+<h2 id="显示前进路线"><a href="#显示前进路线" class="headerlink" title="显示前进路线"></a>显示前进路线</h2><p>在实现显示移动范围后，我还需要显示前进的路线,路线本身实际上就是已经实现的A*算法。但是如何可视化却花了我一个下午的时间。 <img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/20220614212403.png" alt="20220614212403">。</p>
+<center>陷阵之志中的前进路线(绿线)</center>
+
+<p>我一开始的想法是使用3D模型来显示箭头和线段。但是在花了近一个小时看blender的教程后，我连最简单的箭头模型都无法构建出来，最终我放弃了这种做法，改为手绘箭头和线段，并将其作为材质附加到Unity的Cube模型中.我其实对中间的过程完全不了解，在尝试之前我甚至不知道这是可行的。实际上，只需要将shader中的rendering mode设置为Transparent,在一些我并不了解的功能的作用下，模型会根据材质变得部分透明。 <img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/20220614212835.png" alt="20220614212835"></p>
+<center>rendering mode的设置</center>
+
+<p>我一共绘制了三类形状，分别是矩形、转角以及代表终点的箭头。我们可以通过旋转角度的方式来表示各个方向.这就是代码需要做到的事情了。<br><img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/20220614213425.png" alt="20220614213425"></p>
+<center>可见除了本体，其他部分是透明的</center>
+
+<p>为了代码的复用性，我直接使用了此前的A*方法的输出作为新方法的输入。为了解耦，我将此前的UI的显示单独放在一个类中。该方法会在tile被点击的时候被调用。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">public List&lt;Node&gt; generatePathWithSelectedUnit(int x, int y)</span><br><span class="line">&#123;</span><br><span class="line">    var path =  generatePath((int)selectUnit.transform.position.x, (int)selectUnit.transform.position.z, x, y); // 此方法即为之前实现的方法</span><br><span class="line">    return path;</span><br><span class="line">&#125;</span><br><span class="line">// 代码的调用 此处属于tile类中</span><br><span class="line">void OnMouseEnter()</span><br><span class="line">&#123;</span><br><span class="line">    if (map.isInMovementRange(tileX, tileY) == true)</span><br><span class="line">    &#123;</span><br><span class="line">        List&lt;Node&gt; path =  map.generatePathWithSelectedUnit(tileX, tileY);</span><br><span class="line">        MapUI.instance.showPathUI(path);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在显示新的路线前，我们需要先移除此前生成的路线。随后，我们遍历路线。很容易想到，决定某个点是使用矩形、拐角和箭头图形的方向，只取决于该点、该点的上一点以及该点的下一点的相对位置关系。因此，我首先获得了last、cur以及next点.(在我的设计中，起始点不绘制在路线中，终点只可能出现箭头图案，因此单独考虑).为了表示点之间的位置关系,我将后点减去前点，并将结果normalized.通过这种方式得到的向量，我们只需要关注它在x还是y轴是否存在值，以及值的正负情况即可。这是需要一点时间总结的，我大部分的时间就在思考点与点的相互关系上了。按照关系画图应该有助于更快得出结果. 显然，在我的实现里，我先区别图形（即是矩形、拐角还是箭头）,具体来说，当cur与last的方向与next与cur的方向一致的话，cur应该被画成矩形。当他们不一致的时候，则应该是拐角。路径的终点是箭头。对于方向来说，我们需要先确定模型在Unity中的初始方向，然后根据三个点的相对关系即可得到旋转的角度。最终，我们依次实例化这些预制件，即可得到效果.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line">public void showPathUI(List&lt;Node&gt; list)</span><br><span class="line">&#123;</span><br><span class="line">    clearPathUIs();</span><br><span class="line">    for (int i = 1; i &lt; list.Count; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        if (i &lt; list.Count - 1)</span><br><span class="line">        &#123;</span><br><span class="line">            Node last = list[i - 1];</span><br><span class="line">            Node cur = list[i];</span><br><span class="line">            Node next = list[i + 1];</span><br><span class="line">            Vector2 last_cor = new Vector2(last.x, last.y);</span><br><span class="line">            Vector2 cur_cor = new Vector2(cur.x, cur.y);</span><br><span class="line">            Vector2 next_cor = new Vector2(next.x, next.y);</span><br><span class="line">            Vector2 orientation_last = (cur_cor - last_cor).normalized;</span><br><span class="line">            Vector2 orientation_next = (next_cor - cur_cor).normalized;</span><br><span class="line">            if (orientation_last.x == orientation_next.x &amp;&amp; orientation_last.y == orientation_next.y)</span><br><span class="line">            &#123;</span><br><span class="line">                if (orientation_last.x == 1 || orientation_last.x == -1)</span><br><span class="line">                &#123;</span><br><span class="line">                    GameObject go = Instantiate(UIPath, new Vector3(cur.x, path_pathArrowHeight, cur.y),</span><br><span class="line">                        Quaternion.Euler(0,0,0));</span><br><span class="line">                    pathUIs.Add(go);</span><br><span class="line">                &#125;else if (orientation_last.y == 1 || orientation_last.y == -1)</span><br><span class="line">                &#123;</span><br><span class="line">                    GameObject go = Instantiate(UIPath, new Vector3(cur.x, path_pathArrowHeight, cur.y),</span><br><span class="line">                        Quaternion.Euler(0,90,0));</span><br><span class="line">                    pathUIs.Add(go);</span><br><span class="line">                &#125; </span><br><span class="line">            &#125;</span><br><span class="line">            else</span><br><span class="line">            &#123;</span><br><span class="line">                // 0 left 1 right </span><br><span class="line">                int horizontalCode = 0;</span><br><span class="line">                // 0 top 1 bottom</span><br><span class="line">                int verticalCode = 0;</span><br><span class="line">                if (orientation_last.x == -1 || orientation_next.x == 1)</span><br><span class="line">                &#123;</span><br><span class="line">                    horizontalCode = 1;</span><br><span class="line">                &#125;</span><br><span class="line">                if (orientation_last.y == 1 || orientation_next.y == -1)</span><br><span class="line">                &#123;</span><br><span class="line">                    verticalCode = 1;</span><br><span class="line">                &#125;</span><br><span class="line">                if (horizontalCode == 0 &amp;&amp; verticalCode == 0)</span><br><span class="line">                &#123;</span><br><span class="line">                    GameObject go = Instantiate(UIPathCor, new Vector3(cur.x, path_pathArrowHeight, cur.y),</span><br><span class="line">                        Quaternion.Euler(0,180,0));</span><br><span class="line">                    pathUIs.Add(go);</span><br><span class="line">                &#125;else if (horizontalCode == 1 &amp;&amp; verticalCode == 0)</span><br><span class="line">                &#123;</span><br><span class="line">                    GameObject go = Instantiate(UIPathCor, new Vector3(cur.x, path_pathArrowHeight, cur.y),</span><br><span class="line">                        Quaternion.Euler(0,-90,0));</span><br><span class="line">                    pathUIs.Add(go);</span><br><span class="line">                &#125;else if (horizontalCode == 0 &amp;&amp; verticalCode == 1)</span><br><span class="line">                &#123;</span><br><span class="line">                    </span><br><span class="line">                    GameObject go = Instantiate(UIPathCor, new Vector3(cur.x, path_pathArrowHeight, cur.y),</span><br><span class="line">                        Quaternion.Euler(0,90,0));</span><br><span class="line">                    pathUIs.Add(go);</span><br><span class="line">                &#125;else if (horizontalCode == 1 &amp;&amp; verticalCode == 1)</span><br><span class="line">                &#123;</span><br><span class="line">                    GameObject go = Instantiate(UIPathCor, new Vector3(cur.x, path_pathArrowHeight, cur.y),</span><br><span class="line">                        Quaternion.Euler(0,0,0));</span><br><span class="line">                    pathUIs.Add(go);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            Node cur = list[i];</span><br><span class="line">            Node last = list[i - 1];</span><br><span class="line">            Vector2 cur_cor = new Vector2(cur.x, cur.y);</span><br><span class="line">            Vector2 last_cor = new Vector2(last.x, last.y);</span><br><span class="line">            Vector2 orientation = (cur_cor - last_cor).normalized;</span><br><span class="line">            if (orientation.x == 1)</span><br><span class="line">            &#123;</span><br><span class="line">                GameObject go = Instantiate(UIPathArrow, new Vector3(cur.x, path_pathArrowHeight, cur.y),</span><br><span class="line">                    Quaternion.Euler(0,180,0));</span><br><span class="line">                pathUIs.Add(go);</span><br><span class="line">            &#125;else if (orientation.y == -1)</span><br><span class="line">            &#123;</span><br><span class="line">                GameObject go = Instantiate(UIPathArrow, new Vector3(cur.x, path_pathArrowHeight, cur.y),</span><br><span class="line">                    Quaternion.Euler(0,270,0));</span><br><span class="line">                pathUIs.Add(go);</span><br><span class="line">            &#125;else if (orientation.x == -1)</span><br><span class="line">            &#123;</span><br><span class="line">                GameObject go = Instantiate(UIPathArrow, new Vector3(cur.x, path_pathArrowHeight, cur.y),</span><br><span class="line">                    Quaternion.Euler(0,0,0));</span><br><span class="line">                pathUIs.Add(go);</span><br><span class="line">            &#125;else if (orientation.y == 1)</span><br><span class="line">            &#123;</span><br><span class="line">                GameObject go = Instantiate(UIPathArrow, new Vector3(cur.x, path_pathArrowHeight, cur.y),</span><br><span class="line">                    Quaternion.Euler(0,90,0));</span><br><span class="line">                pathUIs.Add(go);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/20220614215430.png" alt="20220614215430"></p>
+<center>可见线路正确被正确处理了</center>
+
+<h2 id="角色按照前进的路线进行移动"><a href="#角色按照前进的路线进行移动" class="headerlink" title="角色按照前进的路线进行移动"></a>角色按照前进的路线进行移动</h2><p>在完成之前的所有步骤后，我们就可以实现角色的移动了。对于角色移动，我希望角色能够按照此前实现的前进路线移动，而非直接跳转。这就需要我们将路线传递给角色。同时，由于回合制的关系，我个人觉得如果update中使用类似于flag的形式决定角色的移动是浪费的，因为在某个确定的时间段，几乎只会有一个角色在进行移动。因此，我参考了<a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=Eq6rCCO2EU0">塞巴的Unity入门教程</a>中有关协程的部分，使用协程来对角色进行移动。值得注意的是我们需要使用两个协程方法来处理拥有多个点的路线的移动。即一个协程用来依次调用路线中的所有节点，另一个则单纯处理点到点之间的移动。我们还需要注意及时终止重复的协程，不然的话就会导致角色卡住或者乱动。以下代码写在Unit类中，该脚本负载在角色上。整个调用流程如下：我们点击一个tile，tile识别鼠标点击，并调用Map类中的移动方法。该移动方法由tile调用，因此知晓了其目的地，随后，该方法会根据绑定在Map类中的selectedUnit属性，即当前选中的角色,调用该角色中的Move方法如下所示。为了获取移动后的结果，我在这使用了Unity的Action方法。即EventSystem类中的<code>EndMovement()</code>方法，传递了终点信息。该方法会通知Map进行一系列必要的操作，包括移动后进行移动力结算，重新绘制移动范围等。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">public void Move(List&lt;Node&gt; list)</span><br><span class="line">&#123;</span><br><span class="line">    pathWay = list;</span><br><span class="line">    StartCoroutine(MoveWithPathway());</span><br><span class="line">    this.movementAbility = (int) list[list.Count - 1].remainMovement;</span><br><span class="line">    EventSystem.instance.EndMovement(list[list.Count - 1]);</span><br><span class="line">&#125;</span><br><span class="line">IEnumerator MoveWithPathway()</span><br><span class="line">&#123;</span><br><span class="line">    foreach (var target in pathWay)</span><br><span class="line">    &#123;</span><br><span class="line">        if (moveCoroutine != null)</span><br><span class="line">        &#123;</span><br><span class="line">            StopCoroutine(moveCoroutine);</span><br><span class="line">        &#125;</span><br><span class="line">        moveCoroutine = MoveTo_Coroutine(target, 20f);</span><br><span class="line">        StartCoroutine(moveCoroutine);</span><br><span class="line">        yield return moveCoroutine;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">IEnumerator MoveTo_Coroutine(Node target, float speed)</span><br><span class="line">&#123;</span><br><span class="line">    while (transform.position.x != target.x || transform.position.z != target.y)</span><br><span class="line">    &#123;</span><br><span class="line">        this.transform.position = Vector3.MoveTowards(transform.position, new Vector3(target.x, transform.position.y, target.y), speed * Time.deltaTime);</span><br><span class="line">        yield return null;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/%E7%A7%BB%E5%8A%A8%E7%9A%84%E5%B1%95%E7%A4%BA%E4%BB%A5%E5%8F%8A%E5%9B%BE%E7%89%87.gif" alt="移动的展示以及图片"></p>
+<center>为了表现移动过程，我减慢了角色的移动速度</center>
+
+
+<h2 id="Unit命令的回退以及命令模式"><a href="#Unit命令的回退以及命令模式" class="headerlink" title="Unit命令的回退以及命令模式"></a>Unit命令的回退以及命令模式</h2><p>在我们实现了角色的移动后，我们还需要实现角色动作的回退。显然，对某时的后悔之心会出现在任何事情上，自然也包括游戏。因此，为了方便的实现对于操作的回退，我们这里需要使用<a target="_blank" rel="noopener" href="https://gpp.tkchu.me/command.html">命令模式</a>.《游戏编程模式》这本书里介绍了一些常见设计模式在游戏开发中的用法，对我来说非常实用。因为写出一个勉强能跑的程序是毫无成就感的事情，而高贵而繁复的<em>设计模式</em>能够让我有种我也是资深程序员的错觉。总之，让我们开始吧。</p>
+<p>为了实现命令模式，我们需要先定义一个<code>command</code>接口。该接口规定了两个方法，分别是<code>execute()</code>以及<code>undo()</code>。不言自明的，前者用于执行，后者用于回退。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public interface Command</span><br><span class="line">&#123;</span><br><span class="line">    public void execute();</span><br><span class="line">    public void undo();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下去，让我们为目前唯一可行的操作——移动创建一个移动命令。目前来看，一个移动命令需要三个参数。分别是需要移动的<code>_unit</code>、移动的<code>_route</code>以及本次移动的花费<code>mobilityCost</code>.因此，我们需要在构造函数中加入这三个参数。然后我们需要实例化实现接口定义的<code>execute()</code>和<code>undo()</code>.逻辑很简单，先让<code>_unit</code>按照<code>_route</code>进行移动操作，然后根据花费更新<code>_unit</code>的行动力<code>movementAbility</code>即可。回退操作即使反过来，先将<code>_route</code>反转，再进行移动以及行动力的更新操作。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">public class MoveToTileCommand : Command</span><br><span class="line">&#123;</span><br><span class="line">    private Unit _unit;</span><br><span class="line">    private List&lt;Node&gt; _route;</span><br><span class="line">    private float mobilityCost;</span><br><span class="line">    public MoveToTileCommand(Unit moveUnit, List&lt;Node&gt; route, float mobilityCost)</span><br><span class="line">    &#123;</span><br><span class="line">        _unit = moveUnit;</span><br><span class="line">        _route = route;</span><br><span class="line">        this.mobilityCost = mobilityCost;</span><br><span class="line">    &#125;</span><br><span class="line">    public void execute()</span><br><span class="line">    &#123;</span><br><span class="line">        _unit.Move(_route);</span><br><span class="line">        _unit.minusMovementAbility(mobilityCost);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void undo()</span><br><span class="line">    &#123;</span><br><span class="line">        _route.Reverse();</span><br><span class="line">        _unit.Move(_route);</span><br><span class="line">        _unit.plusMovementAbility(mobilityCost);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在定义完我们所需要的命令后，我们还需要创建一个用于管理命令的类<code>UnitCommands</code>.这个类的主体就是一个栈，用于保存和回溯命令。在入栈的同时执行命令的<code>execute()</code>,在出栈时执行<code>undo()</code>.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">public class UnitsMovements</span><br><span class="line">&#123;</span><br><span class="line">    private Stack&lt;Command&gt; _commands;</span><br><span class="line"></span><br><span class="line">    public UnitsMovements()</span><br><span class="line">    &#123;</span><br><span class="line">        _commands = new Stack&lt;Command&gt;();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void addCommand(Command newCommand)</span><br><span class="line">    &#123;</span><br><span class="line">        newCommand.execute();</span><br><span class="line">       _commands.Push(newCommand); </span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public void undoCommand()</span><br><span class="line">    &#123;</span><br><span class="line">        if (_commands.Count &gt; 0)</span><br><span class="line">        &#123;</span><br><span class="line">            var lastCommand = _commands.Pop();</span><br><span class="line">            lastCommand.undo();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public int getCommandsCount()</span><br><span class="line">    &#123;</span><br><span class="line">        return _commands.Count;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>在做完以上所有的前置工作后，我们终于能够使用命令模式让角色进行移动了。我们先清空所有的UI，再实例化我们的<code>MoveToTileCommand</code>类，并将该对象加入<code>_unitCommands</code>中。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">public void selectUnitMove(List&lt;Node&gt; route, float mobility)</span><br><span class="line">&#123;</span><br><span class="line">    MapUI.instance.clearMovementUIs();</span><br><span class="line">    MapUI.instance.clearPathUIs();</span><br><span class="line">    Command unitMoveTo = new MoveToTileCommand(selectedUnit, route, mobility);</span><br><span class="line">    _unitCommands.addCommand(unitMoveTo);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于我们还没有完成我们的游戏UI，因此在这里我简单地用一个按钮进行回退命令的执行,来看看效果.如果说命令模式有什么缺陷的话，那就是它往往需要定义许多的类来满足各类操作的需求，这往往会造成冗余。至于解决方法，以我的水平来说难以想到，实际上，我还没有因为类的冗余而困惑过。</p>
+<p><img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/%E7%A7%BB%E5%8A%A81.gif" alt="移动1"></p>
+<center>undo演示</center>
+    </div>
+     
+    <div class="post-footer__meta"><p>updated at 2023-05-09</p></div> 
+    <div class="post-meta__cats"><a href="/tags/Unity/" class="post-tags__link button"># Unity</a><a href="/tags/A/" class="post-tags__link button"># A*</a><a href="/tags/BFS/" class="post-tags__link button"># BFS</a></div> 
+</article>
+
+
+    <div class="nav">
+        <div class="nav__prev">
+            
+                <a href="/2023/02/28/Unity%20PlayerPrefs%E7%AE%80%E6%98%93%E5%AD%98%E6%A1%A3%E7%B3%BB%E7%BB%9F/" class="nav__link">
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M589.088 790.624L310.464 512l278.624-278.624 45.248 45.248L400.96 512l233.376 233.376z" fill="#808080"></path></svg>
+                    </div>
+                    <div>
+                        <div class="nav__label">
+                            Previous Post
+                        </div>
+                        <div class="nav__title">
+                            基于PlayerPrefs的存档机制
+                        </div>
+                    </div>
+                </a>
+            
+        </div>
+        <div class="nav__next">
+            
+                <a href="/2021/12/29/%E6%A0%B9%E6%8D%AE%E8%A7%86%E7%BA%BF%E9%A2%84%E4%BC%B0%E5%9C%A8%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83%E4%B8%AD%E7%9A%84%E6%B7%B1%E5%BA%A6%E6%84%9F%E7%9F%A5/" class="nav__link">
+                    <div>
+                        <div class="nav__label">
+                            Next Post
+                        </div>
+                        <div class="nav__title">
+                            根据视线预估在虚拟环境中的深度感知
+                        </div>
+                    </div>
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M434.944 790.624l-45.248-45.248L623.04 512l-233.376-233.376 45.248-45.248L713.568 512z" fill="#808080"></path></svg>
+                    </div>
+                </a>
+            
+        </div>
+    </div>
+
+
+
+
+
+</main>
+
+            <footer class="footer">
+    
+
+
+    
+     
+ 
+
+ 
+    
+        
+        <p class="footer-copyright">
+            Copyright © 2023 <a href="/">南方真理会</a>
+        </p>
+    
+    
+    <p>Powered by <a href="https://hexo.io" target="_blank">Hexo</a> | Theme - <a href="https://github.com/ChrAlpha/hexo-theme-cards" target="_blank">Cards</a></p>
+</footer>
+
+        </div>
+         
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+ 
+
+
+    
+ 
+
+
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.css">
+
+    
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.js"></script>
+
+    <script>
+        let lazyloadT = Boolean('false'),
+            auto_fancybox = Boolean('true')
+        if (auto_fancybox) {
+            $(".post__content").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        } else {
+            $(".post__content").find("fancybox").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        }
+    </script>
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+
+    </body>
+</html>

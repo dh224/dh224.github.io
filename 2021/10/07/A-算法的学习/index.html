@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+
+    
+
+    <!-- 渲染优化 -->
+    <meta name="renderer" content="webkit">
+    <meta name="force-rendering" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="HandheldFriendly" content="True" >
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!--icon-->
+
+    
+        <link rel="shortcut icon" href="/ico.ico">
+    
+    
+        <link rel="icon" type="image/png" sizes="16x16" href="/smallicon.png">
+    
+    
+        <link rel="icon" type="image/png" sizes="32x32" href="/midicon.png">
+    
+    
+        <link rel="apple-touch-icon" sizes="180x180" href="/ico.ico">
+    
+    
+        <link rel="mask-icon" href="/ico.ico">
+    
+
+
+    <!-- meta -->
+
+
+<title>A-star算法的学习 | 南方真理会</title>
+
+
+    <meta name="keywords" content="算法, Uinty">
+
+
+
+
+    <!-- OpenGraph -->
+ 
+    <meta name="description" content="A*算法的名字我在其他各种地方听过不少次了，这次国庆总算有功夫稍微学习一下。我看的教学视频大致讲述了在Unity引擎下实现的A*算法，同时还有一些优化。但是这个系列视频部分episode没有字幕，看的颇慢。不过也有很多收获，记录一下。更好的是，这系列的教程都有 源码可以参考。 A*算是静态路网中求解最短路径最有效的直接搜索方法，也是解决许多搜索问题的有效算法。A*算法是一种启发式探索的算法。什么是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="A-star算法的学习">
+<meta property="og:url" content="http://dh224.github.io/2021/10/07/A-%E7%AE%97%E6%B3%95%E7%9A%84%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:site_name" content="南方真理会">
+<meta property="og:description" content="A*算法的名字我在其他各种地方听过不少次了，这次国庆总算有功夫稍微学习一下。我看的教学视频大致讲述了在Unity引擎下实现的A*算法，同时还有一些优化。但是这个系列视频部分episode没有字幕，看的颇慢。不过也有很多收获，记录一下。更好的是，这系列的教程都有 源码可以参考。 A*算是静态路网中求解最短路径最有效的直接搜索方法，也是解决许多搜索问题的有效算法。A*算法是一种启发式探索的算法。什么是">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211007141621215.png">
+<meta property="article:published_time" content="2021-10-07T14:14:30.000Z">
+<meta property="article:modified_time" content="2023-05-09T11:04:03.044Z">
+<meta property="article:author" content="dh">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="Uinty">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211007141621215.png">
+
+
+    
+<link rel="stylesheet" href="/style.css">
+ 
+
+    
+    
+        <link rel="stylesheet" id="hl-default-theme" href="/css/highlight/default.css" media="none">
+        
+            <link rel="stylesheet" id="hl-dark-theme" href="/css/highlight/dark.css" media="none">
+        
+    
+
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/style/dark.css">
+
+    
+<script src="/js/darkmode.js"></script>
+
+
+
+     
+
+    <!-- custom head -->
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+    <body>
+        <div id="app">
+            <header class="header">
+    <div class="header__left">
+        <a href="/" class="button">
+            <span class="logo__text">南方真理会</span>
+        </a>
+    </div>
+    <div class="header__right">
+        
+            <div class="navbar__menus">
+                
+                    <a href="/" class="navbar-menu button">首页</a>
+                
+                    <a href="/tags/" class="navbar-menu button">标签</a>
+                
+                    <a href="/archives/" class="navbar-menu button">归档</a>
+                
+            </div>
+        
+        
+        
+
+        
+        
+    <a href="javaScript:void(0);" id="btn-toggle-dark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </a>
+
+
+        
+
+        
+            <a class="dropdown-icon button" id="btn-dropdown" tabindex="0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width='24' height='24' fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path fill="currentColor" d="M3.314,4.8h13.372c0.41,0,0.743-0.333,0.743-0.743c0-0.41-0.333-0.743-0.743-0.743H3.314c-0.41,0-0.743,0.333-0.743,0.743C2.571,4.467,2.904,4.8,3.314,4.8z M16.686,15.2H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,15.2,16.686,15.2z M16.686,9.257H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,9.257,16.686,9.257z"></path></svg></a>
+            <div class="dropdown-menus" id="dropdown-menus">
+                
+                    <a href="/" class="dropdown-menu button">首页</a>
+                
+                    <a href="/tags/" class="dropdown-menu button">标签</a>
+                
+                    <a href="/archives/" class="dropdown-menu button">归档</a>
+                
+            </div>
+        
+    </div>
+</header>
+
+
+            <main class="main">
+    
+
+<div class="post-title">
+    <h1 class="post-title__text">
+        A-star算法的学习
+    </h1>
+    <div class="post-title__meta">
+        <a href="/archives/2021/10/" class="post-meta__date button">2021-10-07</a>
+        
+ 
+        
+    
+    
+
+
+ 
+
+ 
+    </div>
+</div>
+
+
+    <aside class="post-side">
+        <div class="post-side__toc">
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#A-%E6%B3%95%E7%9A%84%E9%80%BB%E8%BE%91%E6%A6%82%E8%BF%B0"><span class="toc-text">A*法的逻辑概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#A-%E7%AE%97%E6%B3%95%E5%9C%A8Untiy%E4%B8%AD%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%92%8C%E8%A1%A8%E8%BE%BE"><span class="toc-text">A*算法在Untiy中的实现和表达</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BB%BA%E7%AB%8BNode%E7%B1%BB%E5%92%8Cgrid%E7%B1%BB"><span class="toc-text">建立Node类和grid类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E7%AE%97%E6%B3%95"><span class="toc-text">实现算法</span></a></li></ol></li></ol>
+        </div>
+    </aside>
+    <a class="btn-toc button" id="btn-toc" tabindex="0">
+        <svg viewBox="0 0 1024 1024" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+            <path d="M128 256h64V192H128zM320 256h576V192H320zM128 544h64v-64H128zM320 544h576v-64H320zM128 832h64v-64H128zM320 832h576v-64H320z" fill="currentColor"></path>
+        </svg>
+    </a>
+    <div class="toc-menus" id="toc-menus">
+        <div class="toc-title">Article Directory</div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#A-%E6%B3%95%E7%9A%84%E9%80%BB%E8%BE%91%E6%A6%82%E8%BF%B0"><span class="toc-text">A*法的逻辑概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#A-%E7%AE%97%E6%B3%95%E5%9C%A8Untiy%E4%B8%AD%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%92%8C%E8%A1%A8%E8%BE%BE"><span class="toc-text">A*算法在Untiy中的实现和表达</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BB%BA%E7%AB%8BNode%E7%B1%BB%E5%92%8Cgrid%E7%B1%BB"><span class="toc-text">建立Node类和grid类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E7%AE%97%E6%B3%95"><span class="toc-text">实现算法</span></a></li></ol></li></ol>
+    </div>
+
+
+<article class="post post__with-toc content-card">
+    <div class="post__header">
+    
+        <div class="post-thumbnail" style="background-image: url('http://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211007141621215.png');"></div>
+    
+
+    <div class="post__expire" id="post-expired-notify">
+        <p>
+            This article was last updated on &lt;span id=&#34;expire-date&#34;&gt;&lt;/span&gt; days ago, the information described in the article may be outdated.
+        </p>
+    </div>
+    <script>
+        (() => {
+            var update = Date.parse("2023-05-09"),
+                date = new Date(),
+                now = date.getTime(),
+                expire = now - update,
+                expire_days = Math.floor(expire/(24*3600*1000));
+            if (expire_days >= 120) {
+                document.querySelectorAll('#expire-date')[0].innerHTML = expire_days;
+                document.querySelectorAll('#post-expired-notify')[0].style.display = 'block';
+            }
+        })();
+    </script>
+</div>
+    <div class="post__content">
+        <p>A*算法的名字我在其他各种地方听过不少次了，这次国庆总算有功夫稍微学习一下。我看的<a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=-L-WgKMFuhE&list=PLFt_AvWsXl0cq5Umv3pMC9SPnKjfp9eGW&index=1">教学视频</a>大致讲述了在Unity引擎下实现的A*算法，同时还有一些优化。但是这个系列视频部分episode没有字幕，看的颇慢。不过也有很多收获，记录一下。更好的是，这系列的教程都有 <a target="_blank" rel="noopener" href="https://github.com/SebLague/Pathfinding">源码</a>可以参考。</p>
+<p>A*算是静态路网中求解最短路径最有效的<strong>直接</strong>搜索方法，也是解决许多搜索问题的有效算法。A*算法是一种启发式探索的算法。什么是启发式探索呢？</p>
+<blockquote>
+<p>启发式探索是利用问题拥有的启发信息来引导搜索，达到减少探索范围，降低问题复杂度的目的。</p>
+</blockquote>
+<h2 id="A-法的逻辑概述"><a href="#A-法的逻辑概述" class="headerlink" title="A*法的逻辑概述"></a>A*法的逻辑概述</h2><p>算法是点对点之间的寻路算法，因此，将路网划归成网格是一个很容易理解的手法。</p>
+<p>在算法中，每个网格记录三个值。分别是Gcost、Hcost、Fcost。如图所示。Gcost是当前网格与起始网格的距离。Hcost是当前网格到终点网格的距离。Fcost则是Gcost和Hcost的和。</p>
+<p>距离可以有欧几里得表示法或者是曼哈顿表示法，这里用符合直觉的欧几里得表示法。即D = sqrt(x1-x2)^2 + (y1-y2)^2)。</p>
+<p><img src="http://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211007143015088.png" alt="image-20211007143015088"></p>
+<p>有了这三个值，我们就可以进行A*算法的逻辑部分了。A*算法的伪代码如下图。其实看图就很容易理解了，但是还是用文字来描述一下。</p>
+<p><img src="http://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211007142813462.png" alt="伪代码"></p>
+<p>首先，我们需要准备OPEN和CLOSDE两个集合，用来存储网格。随后，将起始网格存入OPEN里。随后，找到OPEN中拥有最小Fcost的网格，设定为current，随后将current网格移出OPEN集合并添加到CLOSED集合中。如果此时的current就是目标网格，那么算法就此结束。如果不是，则要依次判断current所有的相邻网格。判断他们在经过current后，是否有更小的Fcost，若有，则更新数据，并将其parent网格设置为current。当然，还要讲邻居网格添加到OPEN集合中。</p>
+<p>经过以上的逻辑，A*算法就能够实现功能了，看上去并不困难，接下去就是实现。</p>
+<h2 id="A-算法在Untiy中的实现和表达"><a href="#A-算法在Untiy中的实现和表达" class="headerlink" title="A*算法在Untiy中的实现和表达"></a>A*算法在Untiy中的实现和表达</h2><h3 id="建立Node类和grid类"><a href="#建立Node类和grid类" class="headerlink" title="建立Node类和grid类"></a>建立Node类和grid类</h3><p>首先，我们需要创建Node类和grid类。用来显示网格和存放节点数据。</p>
+<p>出于某种我不了解的原因，视频作者使用gizmos的方式来显示网格，因此，那些网格只有在scene场景下才能看到。</p>
+<p>总之大概的逻辑就是通过3d的物体来创建网格。如下图所示。红色区域为不可通行区域。搭好了框架，接下去就是实现算法的逻辑了。</p>
+<p><img src="http://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211007155839402.png" alt="image-20211007155839402"></p>
+<h3 id="实现算法"><a href="#实现算法" class="headerlink" title="实现算法"></a>实现算法</h3><p>为了实现算法。我们创建了FindPath类。随后是如下代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">void FindPath(Vector3 startPos, Vector3 targetPos) &#123;</span><br><span class="line">	Node startNode = grid.NodeFromWorldPoint(startPos);</span><br><span class="line">	Node targetNode = grid.NodeFromWorldPoint(targetPos);</span><br><span class="line"></span><br><span class="line">	List&lt;Node&gt; openSet = new List&lt;Node&gt;();</span><br><span class="line">	HashSet&lt;Node&gt; closedSet = new HashSet&lt;Node&gt;();</span><br><span class="line">	openSet.Add(startNode);</span><br><span class="line"></span><br><span class="line">	while (openSet.Count &gt; 0) &#123;</span><br><span class="line">		Node node = openSet[0];</span><br><span class="line">		for (int i = 1; i &lt; openSet.Count; i ++) &#123;</span><br><span class="line">			if (openSet[i].fCost &lt; node.fCost || openSet[i].fCost == node.fCost) &#123;</span><br><span class="line">				if (openSet[i].hCost &lt; node.hCost)</span><br><span class="line">					node = openSet[i];</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		openSet.Remove(node);</span><br><span class="line">		closedSet.Add(node);</span><br><span class="line"></span><br><span class="line">		if (node == targetNode) &#123;</span><br><span class="line">			RetracePath(startNode,targetNode);</span><br><span class="line">			return;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		foreach (Node neighbour in grid.GetNeighbours(node)) &#123;</span><br><span class="line">			if (!neighbour.walkable || closedSet.Contains(neighbour)) &#123;</span><br><span class="line">				continue;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			int newCostToNeighbour = node.gCost + GetDistance(node, neighbour);</span><br><span class="line">			if (newCostToNeighbour &lt; neighbour.gCost || !openSet.Contains(neighbour)) &#123;</span><br><span class="line">				neighbour.gCost = newCostToNeighbour;</span><br><span class="line">				neighbour.hCost = GetDistance(neighbour, targetNode);</span><br><span class="line">				neighbour.parent = node;</span><br><span class="line"></span><br><span class="line">				if (!openSet.Contains(neighbour))</span><br><span class="line">					openSet.Add(neighbour);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">void RetracePath(Node startNode, Node endNode) &#123;</span><br><span class="line">	List&lt;Node&gt; path = new List&lt;Node&gt;();</span><br><span class="line">	Node currentNode = endNode;</span><br><span class="line"></span><br><span class="line">	while (currentNode != startNode) &#123;</span><br><span class="line">		path.Add(currentNode);</span><br><span class="line">		currentNode = currentNode.parent;</span><br><span class="line">	&#125;</span><br><span class="line">	path.Reverse();</span><br><span class="line"></span><br><span class="line">	grid.path = path;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int GetDistance(Node nodeA, Node nodeB) &#123;</span><br><span class="line">	int dstX = Mathf.Abs(nodeA.gridX - nodeB.gridX);</span><br><span class="line">	int dstY = Mathf.Abs(nodeA.gridY - nodeB.gridY);</span><br><span class="line"></span><br><span class="line">	if (dstX &gt; dstY)</span><br><span class="line">		return 14*dstY + 10* (dstX-dstY);</span><br><span class="line">	return 14*dstX + 10 * (dstY-dstX);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>基本上就是用C#代码实现了之前提到的伪代码的逻辑。经过这样的操作，我们的寻路就完成了。接下去就是优化性能和功能。</p>
+<p>待续…………</p>
+
+    </div>
+     
+    <div class="post-footer__meta"><p>updated at 2023-05-09</p></div> 
+    <div class="post-meta__cats"><a href="/tags/%E7%AE%97%E6%B3%95/" class="post-tags__link button"># 算法</a><a href="/tags/Uinty/" class="post-tags__link button"># Uinty</a></div> 
+</article>
+
+
+    <div class="nav">
+        <div class="nav__prev">
+            
+                <a href="/2021/10/08/%E7%9C%8BObject-Management%E6%9C%89%E6%84%9F/" class="nav__link">
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M589.088 790.624L310.464 512l278.624-278.624 45.248 45.248L400.96 512l233.376 233.376z" fill="#808080"></path></svg>
+                    </div>
+                    <div>
+                        <div class="nav__label">
+                            Previous Post
+                        </div>
+                        <div class="nav__title">
+                            看Object Management有感
+                        </div>
+                    </div>
+                </a>
+            
+        </div>
+        <div class="nav__next">
+            
+                <a href="/2021/09/24/dcm%E6%96%87%E4%BB%B6%E7%9A%84%E6%8E%92%E5%BA%8F%E9%97%AE%E9%A2%98/" class="nav__link">
+                    <div>
+                        <div class="nav__label">
+                            Next Post
+                        </div>
+                        <div class="nav__title">
+                            dcm文件的排序问题
+                        </div>
+                    </div>
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M434.944 790.624l-45.248-45.248L623.04 512l-233.376-233.376 45.248-45.248L713.568 512z" fill="#808080"></path></svg>
+                    </div>
+                </a>
+            
+        </div>
+    </div>
+
+
+
+
+
+</main>
+
+            <footer class="footer">
+    
+
+
+    
+     
+ 
+
+ 
+    
+        
+        <p class="footer-copyright">
+            Copyright © 2023 <a href="/">南方真理会</a>
+        </p>
+    
+    
+    <p>Powered by <a href="https://hexo.io" target="_blank">Hexo</a> | Theme - <a href="https://github.com/ChrAlpha/hexo-theme-cards" target="_blank">Cards</a></p>
+</footer>
+
+        </div>
+         
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+ 
+
+
+    
+ 
+
+
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.css">
+
+    
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.js"></script>
+
+    <script>
+        let lazyloadT = Boolean('false'),
+            auto_fancybox = Boolean('true')
+        if (auto_fancybox) {
+            $(".post__content").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        } else {
+            $(".post__content").find("fancybox").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        }
+    </script>
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+
+    </body>
+</html>

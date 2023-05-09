@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+
+    
+
+    <!-- 渲染优化 -->
+    <meta name="renderer" content="webkit">
+    <meta name="force-rendering" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="HandheldFriendly" content="True" >
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!--icon-->
+
+    
+        <link rel="shortcut icon" href="/ico.ico">
+    
+    
+        <link rel="icon" type="image/png" sizes="16x16" href="/smallicon.png">
+    
+    
+        <link rel="icon" type="image/png" sizes="32x32" href="/midicon.png">
+    
+    
+        <link rel="apple-touch-icon" sizes="180x180" href="/ico.ico">
+    
+    
+        <link rel="mask-icon" href="/ico.ico">
+    
+
+
+    <!-- meta -->
+
+
+<title>基于PlayerPrefs的存档机制 | 南方真理会</title>
+
+
+    <meta name="keywords" content="Unity, IK, OMC">
+
+
+
+
+    <!-- OpenGraph -->
+ 
+    <meta name="description" content="PlayerPrefs用于存储玩家偏好设置，支持字符串、int以及float三种类型数据的存储，数据存储在注册表内，不同系统的存储路径不同。尽管本意是用于存储偏好设置，PlayerPrefs也可以用于保存简单的存档。主要API主要是SetXXX()以及GetXXX()系列，比较简单。如： 1PlayerPrefs.SetString(key, value); 这种方式只适合存储基本的数据类型，如果">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于PlayerPrefs的存档机制">
+<meta property="og:url" content="http://dh224.github.io/2023/02/28/Unity%20PlayerPrefs%E7%AE%80%E6%98%93%E5%AD%98%E6%A1%A3%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="南方真理会">
+<meta property="og:description" content="PlayerPrefs用于存储玩家偏好设置，支持字符串、int以及float三种类型数据的存储，数据存储在注册表内，不同系统的存储路径不同。尽管本意是用于存储偏好设置，PlayerPrefs也可以用于保存简单的存档。主要API主要是SetXXX()以及GetXXX()系列，比较简单。如： 1PlayerPrefs.SetString(key, value); 这种方式只适合存储基本的数据类型，如果">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-02-28T11:43:46.000Z">
+<meta property="article:modified_time" content="2023-05-09T11:04:03.044Z">
+<meta property="article:author" content="dh">
+<meta property="article:tag" content="Unity">
+<meta property="article:tag" content="IK">
+<meta property="article:tag" content="OMC">
+<meta name="twitter:card" content="summary_large_image">
+
+
+    
+<link rel="stylesheet" href="/style.css">
+ 
+
+    
+    
+        <link rel="stylesheet" id="hl-default-theme" href="/css/highlight/default.css" media="none">
+        
+            <link rel="stylesheet" id="hl-dark-theme" href="/css/highlight/dark.css" media="none">
+        
+    
+
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/style/dark.css">
+
+    
+<script src="/js/darkmode.js"></script>
+
+
+
+     
+
+    <!-- custom head -->
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+    <body>
+        <div id="app">
+            <header class="header">
+    <div class="header__left">
+        <a href="/" class="button">
+            <span class="logo__text">南方真理会</span>
+        </a>
+    </div>
+    <div class="header__right">
+        
+            <div class="navbar__menus">
+                
+                    <a href="/" class="navbar-menu button">首页</a>
+                
+                    <a href="/tags/" class="navbar-menu button">标签</a>
+                
+                    <a href="/archives/" class="navbar-menu button">归档</a>
+                
+            </div>
+        
+        
+        
+
+        
+        
+    <a href="javaScript:void(0);" id="btn-toggle-dark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </a>
+
+
+        
+
+        
+            <a class="dropdown-icon button" id="btn-dropdown" tabindex="0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width='24' height='24' fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path fill="currentColor" d="M3.314,4.8h13.372c0.41,0,0.743-0.333,0.743-0.743c0-0.41-0.333-0.743-0.743-0.743H3.314c-0.41,0-0.743,0.333-0.743,0.743C2.571,4.467,2.904,4.8,3.314,4.8z M16.686,15.2H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,15.2,16.686,15.2z M16.686,9.257H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,9.257,16.686,9.257z"></path></svg></a>
+            <div class="dropdown-menus" id="dropdown-menus">
+                
+                    <a href="/" class="dropdown-menu button">首页</a>
+                
+                    <a href="/tags/" class="dropdown-menu button">标签</a>
+                
+                    <a href="/archives/" class="dropdown-menu button">归档</a>
+                
+            </div>
+        
+    </div>
+</header>
+
+
+            <main class="main">
+    
+
+<div class="post-title">
+    <h1 class="post-title__text">
+        基于PlayerPrefs的存档机制
+    </h1>
+    <div class="post-title__meta">
+        <a href="/archives/2023/02/" class="post-meta__date button">2023-02-28</a>
+        
+ 
+        
+    
+    
+
+
+ 
+
+ 
+    </div>
+</div>
+
+
+    <aside class="post-side">
+        <div class="post-side__toc">
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8EJSON%E7%9A%84%E5%AD%98%E6%A1%A3%E6%9C%BA%E5%88%B6"><span class="toc-text">基于JSON的存档机制</span></a></li></ol>
+        </div>
+    </aside>
+    <a class="btn-toc button" id="btn-toc" tabindex="0">
+        <svg viewBox="0 0 1024 1024" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+            <path d="M128 256h64V192H128zM320 256h576V192H320zM128 544h64v-64H128zM320 544h576v-64H320zM128 832h64v-64H128zM320 832h576v-64H320z" fill="currentColor"></path>
+        </svg>
+    </a>
+    <div class="toc-menus" id="toc-menus">
+        <div class="toc-title">Article Directory</div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8EJSON%E7%9A%84%E5%AD%98%E6%A1%A3%E6%9C%BA%E5%88%B6"><span class="toc-text">基于JSON的存档机制</span></a></li></ol>
+    </div>
+
+
+<article class="post post__with-toc content-card">
+    <div class="post__header">
+    
+        <div class="post-thumbnail" style="background-image: url('quesheng.jpg');"></div>
+    
+
+    <div class="post__expire" id="post-expired-notify">
+        <p>
+            This article was last updated on &lt;span id=&#34;expire-date&#34;&gt;&lt;/span&gt; days ago, the information described in the article may be outdated.
+        </p>
+    </div>
+    <script>
+        (() => {
+            var update = Date.parse("2023-05-09"),
+                date = new Date(),
+                now = date.getTime(),
+                expire = now - update,
+                expire_days = Math.floor(expire/(24*3600*1000));
+            if (expire_days >= 120) {
+                document.querySelectorAll('#expire-date')[0].innerHTML = expire_days;
+                document.querySelectorAll('#post-expired-notify')[0].style.display = 'block';
+            }
+        })();
+    </script>
+</div>
+    <div class="post__content">
+        <p><a target="_blank" rel="noopener" href="https://docs.unity3d.com/ScriptReference/PlayerPrefs.html">PlayerPrefs</a>用于存储玩家偏好设置，支持字符串、int以及float三种类型数据的存储，数据存储在注册表内，不同系统的存储路径不同。尽管本意是用于存储偏好设置，PlayerPrefs也可以用于保存简单的存档。<br>主要API主要是SetXXX()以及GetXXX()系列，比较简单。如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PlayerPrefs.SetString(key, value);</span><br></pre></td></tr></table></figure>
+<p>这种方式只适合存储基本的数据类型，如果需要存储稍复杂一点的数据，我们可以定义一个类，如：PlayerData，随后使用Unity内建的JsonUtility将PlayerData类转换为JSON格式，这样就可以将多个数据封装成为单个数据类型并以字符串的形式存储了，读取也是类似，以字符串的类型读取，再使用JsonUtility转回PlayerData类即可，代码示例如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">// 设定的Data类，用于封装多种类型的数据</span><br><span class="line">[System.Serializable]  </span><br><span class="line">class SaveData  </span><br><span class="line">&#123;  </span><br><span class="line">    public string playerName;  </span><br><span class="line">    public int playerLevel;  </span><br><span class="line">    public int playerCoin;  </span><br><span class="line">    public Vector3 playerPosition;  </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public static void SaveByPlayerPrefs(string key, object data)  // 存储数据，先转成JSON格式再以String格式存储。</span><br><span class="line">&#123;  </span><br><span class="line">    var json = JsonUtility.ToJson(data);  </span><br><span class="line">    PlayerPrefs.SetString(key, json);  </span><br><span class="line">    PlayerPrefs.Save();  </span><br><span class="line">#if UNITY_EDITOR  </span><br><span class="line">    Debug.Log(&quot;Successfully saved data to PlayerPrefs.&quot;);  </span><br><span class="line">#endif  </span><br><span class="line">&#125;</span><br><span class="line">public static string LoadByPlayerPrefs(string key)  // 从注册表中读取数据</span><br><span class="line">&#123;  </span><br><span class="line">    return PlayerPrefs.GetString(key, null);  </span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="基于JSON的存档机制"><a href="#基于JSON的存档机制" class="headerlink" title="基于JSON的存档机制"></a>基于JSON的存档机制</h2><p>在实现PlayerPrefs的存档之后，可以很容易地想到：我们可以直接将JSON文件存储下来。这样做的好处是可以方便地建立起云存档服务。与之前的代码类似，只是多了文件操作的部分.如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">public static void SaveByJSON(string saveFileName, object dataObject)  </span><br><span class="line">&#123;  </span><br><span class="line">    var json = JsonUtility.ToJson(dataObject);  </span><br><span class="line">    var path = Path.Combine(Application.persistentDataPath, saveFileName);  </span><br><span class="line">    try  </span><br><span class="line">    &#123;  </span><br><span class="line">        File.WriteAllText(path,json);  </span><br><span class="line">    #if UNITY_EDITOR  </span><br><span class="line">        Debug.Log($&quot;Successfully saved data to &#123;path&#125;&quot;);  </span><br><span class="line">    #endif  </span><br><span class="line">    &#125;  </span><br><span class="line">    catch (System.Exception e)  </span><br><span class="line">    &#123;    #if UNITY_EDITOR  </span><br><span class="line">        Debug.LogError($&quot;Failed to save data to &#123;path&#125;. \n because of Exception : &#123;e&#125;&quot;);  </span><br><span class="line">    #endif  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line">public static T LoadFromJSON&lt;T&gt;(string saveFileName)  </span><br><span class="line">&#123;  </span><br><span class="line">    var path = Path.Combine(Application.persistentDataPath, saveFileName);  </span><br><span class="line">    try  </span><br><span class="line">    &#123;  </span><br><span class="line">        var json = File.ReadAllText(path);  </span><br><span class="line">        var data = JsonUtility.FromJson&lt;T&gt;(json);  </span><br><span class="line">        return data;  </span><br><span class="line">    &#125;    catch (System.Exception e)  </span><br><span class="line">    &#123;    #if UNITY_EDITOR  </span><br><span class="line">        Debug.LogError($&quot;Failed to load data from &#123;path&#125;. \n because of Exception : &#123;e&#125;&quot;);  </span><br><span class="line">    #endif  </span><br><span class="line">        return default;   </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br><span class="line">  </span><br><span class="line">#region Deleting  </span><br><span class="line">  </span><br><span class="line">public static void DeleteSaveFile(string saveFileName)  </span><br><span class="line">&#123;  </span><br><span class="line">    var path = Path.Combine(Application.persistentDataPath, saveFileName);  </span><br><span class="line">    try  </span><br><span class="line">    &#123;  </span><br><span class="line">        File.Delete(path);  </span><br><span class="line">    &#125;    catch (System.Exception e)  </span><br><span class="line">    &#123;    #if UNITY_EDITOR  </span><br><span class="line">        Debug.LogError($&quot;Failed to delete data from &#123;path&#125;. \n because of Exception : &#123;e&#125;&quot;);  </span><br><span class="line">    #endif  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>代码都很容易懂，就不需要注释了。值得一提的是我们可以使用Path.persistenDataPath获得存储路径，这个路径会在项目Build时自动适配不同的操作系统，我们不再需要手动设置了。</p>
+<blockquote>
+<p>整篇文章的内容主要照抄自阿严的<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1Cb4y1b71G"><em>存档系统</em></a>.</p>
+</blockquote>
+
+    </div>
+     
+    <div class="post-footer__meta"><p>updated at 2023-05-09</p></div> 
+    <div class="post-meta__cats"><a href="/tags/Unity/" class="post-tags__link button"># Unity</a><a href="/tags/IK/" class="post-tags__link button"># IK</a><a href="/tags/OMC/" class="post-tags__link button"># OMC</a></div> 
+</article>
+
+
+    <div class="nav">
+        <div class="nav__prev">
+            
+                <a href="/2023/03/03/OMC%E8%AE%BA%E6%96%87/" class="nav__link">
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M589.088 790.624L310.464 512l278.624-278.624 45.248 45.248L400.96 512l233.376 233.376z" fill="#808080"></path></svg>
+                    </div>
+                    <div>
+                        <div class="nav__label">
+                            Previous Post
+                        </div>
+                        <div class="nav__title">
+                            OMC
+                        </div>
+                    </div>
+                </a>
+            
+        </div>
+        <div class="nav__next">
+            
+                <a href="/2022/06/13/%E5%9B%9E%E5%90%88%E5%88%B6%E6%B8%B8%E6%88%8F%E4%B8%AD%E7%9A%84%E5%AF%BB%E8%B7%AF%E4%BB%A5%E5%8F%8A%E6%98%BE%E7%A4%BA%E7%A7%BB%E5%8A%A8%E8%8C%83%E5%9B%B4/" class="nav__link">
+                    <div>
+                        <div class="nav__label">
+                            Next Post
+                        </div>
+                        <div class="nav__title">
+                            回合制游戏中的寻路以及显示移动范围
+                        </div>
+                    </div>
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M434.944 790.624l-45.248-45.248L623.04 512l-233.376-233.376 45.248-45.248L713.568 512z" fill="#808080"></path></svg>
+                    </div>
+                </a>
+            
+        </div>
+    </div>
+
+
+
+
+
+</main>
+
+            <footer class="footer">
+    
+
+
+    
+     
+ 
+
+ 
+    
+        
+        <p class="footer-copyright">
+            Copyright © 2023 <a href="/">南方真理会</a>
+        </p>
+    
+    
+    <p>Powered by <a href="https://hexo.io" target="_blank">Hexo</a> | Theme - <a href="https://github.com/ChrAlpha/hexo-theme-cards" target="_blank">Cards</a></p>
+</footer>
+
+        </div>
+         
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+ 
+
+
+    
+ 
+
+
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.css">
+
+    
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.js"></script>
+
+    <script>
+        let lazyloadT = Boolean('false'),
+            auto_fancybox = Boolean('true')
+        if (auto_fancybox) {
+            $(".post__content").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        } else {
+            $(".post__content").find("fancybox").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        }
+    </script>
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+
+    </body>
+</html>

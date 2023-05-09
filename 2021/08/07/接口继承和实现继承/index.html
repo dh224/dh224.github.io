@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+
+    
+
+    <!-- 渲染优化 -->
+    <meta name="renderer" content="webkit">
+    <meta name="force-rendering" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="HandheldFriendly" content="True" >
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!--icon-->
+
+    
+        <link rel="shortcut icon" href="/ico.ico">
+    
+    
+        <link rel="icon" type="image/png" sizes="16x16" href="/smallicon.png">
+    
+    
+        <link rel="icon" type="image/png" sizes="32x32" href="/midicon.png">
+    
+    
+        <link rel="apple-touch-icon" sizes="180x180" href="/ico.ico">
+    
+    
+        <link rel="mask-icon" href="/ico.ico">
+    
+
+
+    <!-- meta -->
+
+
+<title>接口继承和实现继承 | 南方真理会</title>
+
+
+    <meta name="keywords" content="语法, 小细节, 胡说">
+
+
+
+
+    <!-- OpenGraph -->
+ 
+    <meta name="description" content="封面来自CSAPP中的存储器山  今天看了cs61b的4.1，里面提到interface inheritance implementation   inheritance的概念。尽管课程中举了例子来说明这一点，但是对来我说似乎有点不直观。  Interface inheritance (what): Simply tells what the subclasses should be able t">
+<meta property="og:type" content="article">
+<meta property="og:title" content="接口继承和实现继承">
+<meta property="og:url" content="http://dh224.github.io/2021/08/07/%E6%8E%A5%E5%8F%A3%E7%BB%A7%E6%89%BF%E5%92%8C%E5%AE%9E%E7%8E%B0%E7%BB%A7%E6%89%BF/index.html">
+<meta property="og:site_name" content="南方真理会">
+<meta property="og:description" content="封面来自CSAPP中的存储器山  今天看了cs61b的4.1，里面提到interface inheritance implementation   inheritance的概念。尽管课程中举了例子来说明这一点，但是对来我说似乎有点不直观。  Interface inheritance (what): Simply tells what the subclasses should be able t">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://satt.oss-cn-hangzhou.aliyuncs.com/img/QQ截图20210809084304.png">
+<meta property="article:published_time" content="2021-08-07T21:37:28.000Z">
+<meta property="article:modified_time" content="2023-05-09T11:04:03.044Z">
+<meta property="article:author" content="dh">
+<meta property="article:tag" content="语法">
+<meta property="article:tag" content="小细节">
+<meta property="article:tag" content="胡说">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://satt.oss-cn-hangzhou.aliyuncs.com/img/QQ截图20210809084304.png">
+
+
+    
+<link rel="stylesheet" href="/style.css">
+ 
+
+    
+    
+        <link rel="stylesheet" id="hl-default-theme" href="/css/highlight/default.css" media="none">
+        
+            <link rel="stylesheet" id="hl-dark-theme" href="/css/highlight/dark.css" media="none">
+        
+    
+
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/style/dark.css">
+
+    
+<script src="/js/darkmode.js"></script>
+
+
+
+     
+
+    <!-- custom head -->
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+    <body>
+        <div id="app">
+            <header class="header">
+    <div class="header__left">
+        <a href="/" class="button">
+            <span class="logo__text">南方真理会</span>
+        </a>
+    </div>
+    <div class="header__right">
+        
+            <div class="navbar__menus">
+                
+                    <a href="/" class="navbar-menu button">首页</a>
+                
+                    <a href="/tags/" class="navbar-menu button">标签</a>
+                
+                    <a href="/archives/" class="navbar-menu button">归档</a>
+                
+            </div>
+        
+        
+        
+
+        
+        
+    <a href="javaScript:void(0);" id="btn-toggle-dark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </a>
+
+
+        
+
+        
+            <a class="dropdown-icon button" id="btn-dropdown" tabindex="0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width='24' height='24' fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path fill="currentColor" d="M3.314,4.8h13.372c0.41,0,0.743-0.333,0.743-0.743c0-0.41-0.333-0.743-0.743-0.743H3.314c-0.41,0-0.743,0.333-0.743,0.743C2.571,4.467,2.904,4.8,3.314,4.8z M16.686,15.2H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,15.2,16.686,15.2z M16.686,9.257H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,9.257,16.686,9.257z"></path></svg></a>
+            <div class="dropdown-menus" id="dropdown-menus">
+                
+                    <a href="/" class="dropdown-menu button">首页</a>
+                
+                    <a href="/tags/" class="dropdown-menu button">标签</a>
+                
+                    <a href="/archives/" class="dropdown-menu button">归档</a>
+                
+            </div>
+        
+    </div>
+</header>
+
+
+            <main class="main">
+    
+
+<div class="post-title">
+    <h1 class="post-title__text">
+        接口继承和实现继承
+    </h1>
+    <div class="post-title__meta">
+        <a href="/archives/2021/08/" class="post-meta__date button">2021-08-07</a>
+        
+ 
+        
+    
+    
+
+
+ 
+
+ 
+    </div>
+</div>
+
+
+    <aside class="post-side">
+        <div class="post-side__toc">
+            
+        </div>
+    </aside>
+    <a class="btn-toc button" id="btn-toc" tabindex="0">
+        <svg viewBox="0 0 1024 1024" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+            <path d="M128 256h64V192H128zM320 256h576V192H320zM128 544h64v-64H128zM320 544h576v-64H320zM128 832h64v-64H128zM320 832h576v-64H320z" fill="currentColor"></path>
+        </svg>
+    </a>
+    <div class="toc-menus" id="toc-menus">
+        <div class="toc-title">Article Directory</div>
+        
+    </div>
+
+
+<article class="post post__with-toc content-card">
+    <div class="post__header">
+    
+        <div class="post-thumbnail" style="background-image: url('http://satt.oss-cn-hangzhou.aliyuncs.com/img/QQ截图20210809084304.png');"></div>
+    
+
+    <div class="post__expire" id="post-expired-notify">
+        <p>
+            This article was last updated on &lt;span id=&#34;expire-date&#34;&gt;&lt;/span&gt; days ago, the information described in the article may be outdated.
+        </p>
+    </div>
+    <script>
+        (() => {
+            var update = Date.parse("2023-05-09"),
+                date = new Date(),
+                now = date.getTime(),
+                expire = now - update,
+                expire_days = Math.floor(expire/(24*3600*1000));
+            if (expire_days >= 120) {
+                document.querySelectorAll('#expire-date')[0].innerHTML = expire_days;
+                document.querySelectorAll('#post-expired-notify')[0].style.display = 'block';
+            }
+        })();
+    </script>
+</div>
+    <div class="post__content">
+        <p><em>封面来自CSAPP中的存储器山</em></p>
+<hr>
+<p>今天看了cs61b的4.1，里面提到interface inheritance implementation   inheritance的概念。尽管课程中举了例子来说明这一点，但是对来我说似乎有点不直观。</p>
+<blockquote>
+<p>Interface inheritance (what): Simply tells what the subclasses should be able to do.<br>EX) all lists should be able to print themselves, how they do it is up to them.<br>Implementation inheritance (how): Tells the subclasses how they should behave.<br>EX) Lists should print themselves exactly this way: by getting each element in order and then printing them.</p>
+</blockquote>
+<p>于是我另外搜索了一些博客，得到如下的回答。</p>
+<blockquote>
+<p>接口继承： 派生类只继承函数接口，也就是声明。<br>实现继承：派生类同时继承函数的接口和实现。</p>
+</blockquote>
+<p>这样的用词显得更加严肃一点，似乎给了我更多的信心。</p>
+<p>总之，为了让这篇文章更有价值，我写下我的理解。</p>
+<p>接口继承：子类（或是派生类，我其实并不懂什么是<em>派生类</em>）所继承的是一个和多个接口（即真正的接口，没有实现）（尽管在java中，要用到implements来实现接口，但他就是接口继承）。</p>
+<p>实现继承：其父类带有部分函数的实现，实际上，它就不再是狭义的接口了。（尽管可以）。</p>
+<p>感觉我说的相当复杂，而且没什么逻辑。简而言之，就是接口继承，就是子类继承的是一个纯虚函数，父类没有带任何的实现。而实现继承，则是父类带有部分函数或者全部函数的实现，子类可以沿用或者override。</p>
+
+    </div>
+     
+    <div class="post-footer__meta"><p>updated at 2023-05-09</p></div> 
+    <div class="post-meta__cats"><a href="/tags/%E8%AF%AD%E6%B3%95/" class="post-tags__link button"># 语法</a><a href="/tags/%E5%B0%8F%E7%BB%86%E8%8A%82/" class="post-tags__link button"># 小细节</a><a href="/tags/%E8%83%A1%E8%AF%B4/" class="post-tags__link button"># 胡说</a></div> 
+</article>
+
+
+    <div class="nav">
+        <div class="nav__prev">
+            
+                <a href="/2021/08/08/java%E4%B8%AD%E7%9A%84%E9%AB%98%E9%98%B6%E5%87%BD%E6%95%B0/" class="nav__link">
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M589.088 790.624L310.464 512l278.624-278.624 45.248 45.248L400.96 512l233.376 233.376z" fill="#808080"></path></svg>
+                    </div>
+                    <div>
+                        <div class="nav__label">
+                            Previous Post
+                        </div>
+                        <div class="nav__title">
+                            java中的高阶函数
+                        </div>
+                    </div>
+                </a>
+            
+        </div>
+        <div class="nav__next">
+            
+                <a href="/2021/08/03/%E5%85%B3%E4%BA%8Ebomblab/" class="nav__link">
+                    <div>
+                        <div class="nav__label">
+                            Next Post
+                        </div>
+                        <div class="nav__title">
+                            关于bomblab
+                        </div>
+                    </div>
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M434.944 790.624l-45.248-45.248L623.04 512l-233.376-233.376 45.248-45.248L713.568 512z" fill="#808080"></path></svg>
+                    </div>
+                </a>
+            
+        </div>
+    </div>
+
+
+
+
+
+</main>
+
+            <footer class="footer">
+    
+
+
+    
+     
+ 
+
+ 
+    
+        
+        <p class="footer-copyright">
+            Copyright © 2023 <a href="/">南方真理会</a>
+        </p>
+    
+    
+    <p>Powered by <a href="https://hexo.io" target="_blank">Hexo</a> | Theme - <a href="https://github.com/ChrAlpha/hexo-theme-cards" target="_blank">Cards</a></p>
+</footer>
+
+        </div>
+         
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+ 
+
+
+    
+ 
+
+
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.css">
+
+    
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.js"></script>
+
+    <script>
+        let lazyloadT = Boolean('false'),
+            auto_fancybox = Boolean('true')
+        if (auto_fancybox) {
+            $(".post__content").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        } else {
+            $(".post__content").find("fancybox").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        }
+    </script>
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+
+    </body>
+</html>

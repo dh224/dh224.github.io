@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+
+    
+
+    <!-- 渲染优化 -->
+    <meta name="renderer" content="webkit">
+    <meta name="force-rendering" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="HandheldFriendly" content="True" >
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!--icon-->
+
+    
+        <link rel="shortcut icon" href="/ico.ico">
+    
+    
+        <link rel="icon" type="image/png" sizes="16x16" href="/smallicon.png">
+    
+    
+        <link rel="icon" type="image/png" sizes="32x32" href="/midicon.png">
+    
+    
+        <link rel="apple-touch-icon" sizes="180x180" href="/ico.ico">
+    
+    
+        <link rel="mask-icon" href="/ico.ico">
+    
+
+
+    <!-- meta -->
+
+
+<title>Unity性能优化——Unity Profiler初探 | 南方真理会</title>
+
+
+    <meta name="keywords" content="Unity, IK, OMC, 性能优化">
+
+
+
+
+    <!-- OpenGraph -->
+ 
+    <meta name="description" content="起因这两天OMC大概搭建了个框架，发现在运行时帧数不高，基本卡着90fps运行，常常出现卡顿。为了搞明白这一点，我在哔哩哔哩找了个使用入门Profiler的教程。感觉学到了不少以前从未想过的问题，现将学习经过记录下来，以供复习。  在找教程的时候发现了一个新工具——内存分析器（Memory Profiler）内存分析器的介绍，看上去很酷的样子，不过这个工具在Unity2022及以后的版本中才进入验">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Unity性能优化——Unity Profiler初探">
+<meta property="og:url" content="http://dh224.github.io/2023/03/04/Unity%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E2%80%94%E2%80%94Unity%20Profiler%E5%88%9D%E6%8E%A2/index.html">
+<meta property="og:site_name" content="南方真理会">
+<meta property="og:description" content="起因这两天OMC大概搭建了个框架，发现在运行时帧数不高，基本卡着90fps运行，常常出现卡顿。为了搞明白这一点，我在哔哩哔哩找了个使用入门Profiler的教程。感觉学到了不少以前从未想过的问题，现将学习经过记录下来，以供复习。  在找教程的时候发现了一个新工具——内存分析器（Memory Profiler）内存分析器的介绍，看上去很酷的样子，不过这个工具在Unity2022及以后的版本中才进入验">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303042214931.png">
+<meta property="article:published_time" content="2023-03-04T21:56:01.000Z">
+<meta property="article:modified_time" content="2023-05-09T11:04:03.044Z">
+<meta property="article:author" content="dh">
+<meta property="article:tag" content="Unity">
+<meta property="article:tag" content="IK">
+<meta property="article:tag" content="OMC">
+<meta property="article:tag" content="性能优化">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303042214931.png">
+
+
+    
+<link rel="stylesheet" href="/style.css">
+ 
+
+    
+    
+        <link rel="stylesheet" id="hl-default-theme" href="/css/highlight/default.css" media="none">
+        
+            <link rel="stylesheet" id="hl-dark-theme" href="/css/highlight/dark.css" media="none">
+        
+    
+
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/style/dark.css">
+
+    
+<script src="/js/darkmode.js"></script>
+
+
+
+     
+
+    <!-- custom head -->
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+    <body>
+        <div id="app">
+            <header class="header">
+    <div class="header__left">
+        <a href="/" class="button">
+            <span class="logo__text">南方真理会</span>
+        </a>
+    </div>
+    <div class="header__right">
+        
+            <div class="navbar__menus">
+                
+                    <a href="/" class="navbar-menu button">首页</a>
+                
+                    <a href="/tags/" class="navbar-menu button">标签</a>
+                
+                    <a href="/archives/" class="navbar-menu button">归档</a>
+                
+            </div>
+        
+        
+        
+
+        
+        
+    <a href="javaScript:void(0);" id="btn-toggle-dark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </a>
+
+
+        
+
+        
+            <a class="dropdown-icon button" id="btn-dropdown" tabindex="0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width='24' height='24' fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path fill="currentColor" d="M3.314,4.8h13.372c0.41,0,0.743-0.333,0.743-0.743c0-0.41-0.333-0.743-0.743-0.743H3.314c-0.41,0-0.743,0.333-0.743,0.743C2.571,4.467,2.904,4.8,3.314,4.8z M16.686,15.2H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,15.2,16.686,15.2z M16.686,9.257H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,9.257,16.686,9.257z"></path></svg></a>
+            <div class="dropdown-menus" id="dropdown-menus">
+                
+                    <a href="/" class="dropdown-menu button">首页</a>
+                
+                    <a href="/tags/" class="dropdown-menu button">标签</a>
+                
+                    <a href="/archives/" class="dropdown-menu button">归档</a>
+                
+            </div>
+        
+    </div>
+</header>
+
+
+            <main class="main">
+    
+
+<div class="post-title">
+    <h1 class="post-title__text">
+        Unity性能优化——Unity Profiler初探
+    </h1>
+    <div class="post-title__meta">
+        <a href="/archives/2023/03/" class="post-meta__date button">2023-03-04</a>
+        
+ 
+        
+    
+    
+
+
+ 
+
+ 
+    </div>
+</div>
+
+
+    <aside class="post-side">
+        <div class="post-side__toc">
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B5%B7%E5%9B%A0"><span class="toc-text">起因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Profiler%E4%BB%8B%E7%BB%8D"><span class="toc-text">Profiler介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-text">准备工作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E5%88%86%E6%9E%90"><span class="toc-text">开始分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86-GC"><span class="toc-text">垃圾收集 GC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E8%A1%8C%E5%A4%9A%E5%B8%A7%E5%88%86%E6%9E%90"><span class="toc-text">进行多帧分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Freame-Debugger"><span class="toc-text">Freame Debugger</span></a></li></ol></li></ol>
+        </div>
+    </aside>
+    <a class="btn-toc button" id="btn-toc" tabindex="0">
+        <svg viewBox="0 0 1024 1024" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+            <path d="M128 256h64V192H128zM320 256h576V192H320zM128 544h64v-64H128zM320 544h576v-64H320zM128 832h64v-64H128zM320 832h576v-64H320z" fill="currentColor"></path>
+        </svg>
+    </a>
+    <div class="toc-menus" id="toc-menus">
+        <div class="toc-title">Article Directory</div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B5%B7%E5%9B%A0"><span class="toc-text">起因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Profiler%E4%BB%8B%E7%BB%8D"><span class="toc-text">Profiler介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-text">准备工作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80%E5%A7%8B%E5%88%86%E6%9E%90"><span class="toc-text">开始分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86-GC"><span class="toc-text">垃圾收集 GC</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9B%E8%A1%8C%E5%A4%9A%E5%B8%A7%E5%88%86%E6%9E%90"><span class="toc-text">进行多帧分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Freame-Debugger"><span class="toc-text">Freame Debugger</span></a></li></ol></li></ol>
+    </div>
+
+
+<article class="post post__with-toc content-card">
+    <div class="post__header">
+    
+        <div class="post-thumbnail" style="background-image: url('https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303042214931.png');"></div>
+    
+
+    <div class="post__expire" id="post-expired-notify">
+        <p>
+            This article was last updated on &lt;span id=&#34;expire-date&#34;&gt;&lt;/span&gt; days ago, the information described in the article may be outdated.
+        </p>
+    </div>
+    <script>
+        (() => {
+            var update = Date.parse("2023-05-09"),
+                date = new Date(),
+                now = date.getTime(),
+                expire = now - update,
+                expire_days = Math.floor(expire/(24*3600*1000));
+            if (expire_days >= 120) {
+                document.querySelectorAll('#expire-date')[0].innerHTML = expire_days;
+                document.querySelectorAll('#post-expired-notify')[0].style.display = 'block';
+            }
+        })();
+    </script>
+</div>
+    <div class="post__content">
+        <h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>这两天OMC大概搭建了个框架，发现在运行时帧数不高，基本卡着90fps运行，常常出现卡顿。为了搞明白这一点，我在哔哩哔哩找了个使用入门Profiler的<a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1xz4y167rx/?vd_source=068c2a124b2fb99b31ca74c34e2ad41e">教程</a>。感觉学到了不少以前从未想过的问题，现将学习经过记录下来，以供复习。</p>
+<blockquote>
+<p>在找教程的时候发现了一个新工具——内存分析器（Memory Profiler）<a target="_blank" rel="noopener" href="https://blog.unity.com/cn/engine-platform/everything-you-need-to-know-about-memory-profiler">内存分析器的介绍，看上去很酷的样子</a>，不过这个工具在Unity2022及以后的版本中才进入验证(Verified)阶段，对于我这个尚未了解Profiler的人来说过于先进，还是在这里留个记录，后面有时间再学习研究吧。</p>
+</blockquote>
+<hr>
+<h2 id="Profiler介绍"><a href="#Profiler介绍" class="headerlink" title="Profiler介绍"></a>Profiler介绍</h2><p>在Unity中使用的Profiler是一种 Instrumentation-based profiler（IBP），与Sample-based profiler（SBP）不同的是，<em>IBP</em>在每个函数调用的开始和结束时都会自动插入marker，而不是<em>SBP</em>中使用snapshots（快照）技术。这两种方法的区别在于<em>IBP</em>能够捕捉所有时刻的变化，但是会引入额外开销。而<em>SBP</em> 则可能会错过某些信息.</p>
+<blockquote>
+<p>不过我不清楚什么是快照技术,似乎之前提到的内存分析器就是使用到了快照.</p>
+</blockquote>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>总之,让我们使用Profiler对项目进行分析. 果然,我的项目中常常出现奇怪的卡顿,但是发现占用主要时间的居然是editor,这或许是因为我是在editor中的playmode中进行调试的. 我们可以通过构建develop build的方式解决这个问题.<br><img src="https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303042214931.png" alt="image.png"></p>
+<p>具体来说,我们需要在Build Setting中勾选 Development Build 以及autoconnect profiler选项,这样我们就可以在外部运行的游戏的同时对其使用profiler进行性能分析了.在打开游戏后,profiler将会自动开始捕获游戏.此时我们可以看到Editor Loop不再出现了.<br><img src="https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303042218669.png" alt="image.png"><br><img src="https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303042220801.png" alt="image.png"></p>
+<h3 id="开始分析"><a href="#开始分析" class="headerlink" title="开始分析"></a>开始分析</h3><p>尽管让游戏运行在我们的目标帧数(例如90fps)是我们性能调优的最终目的,但是对于性能调优本身来说,我们更需要关注的是单帧的预算时间.我们的目的是合理配置,使得每一帧的开销都小于等于预算时间.这种单帧预算时间给了我们一个好的衡量标准.<br><img src="https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303042223589.png" alt="image.png"><br>作者介绍了什么是Rendering API calls,总之就是我们游戏的运行需要CPU和GPU协同计算,当CPU性能不足时,就会出现等待问题，浪费性能。下两图是两种不同的等待情况：1. GPU等待CPU 2. CPU等待GPU。此外，我们还可以使用<code>Application.targetFrameRate</code>对预期帧速率进行设置。<br><img src="https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303051011652.png" alt="image.png"><br><img src="https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303051011841.png" alt="image.png"><br>这张图显示了VSyunc的工作方式，在极端情况下可能导致帧率减半。<br><img src="https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303051044797.png" alt="image.png"></p>
+<h3 id="垃圾收集-GC"><a href="#垃圾收集-GC" class="headerlink" title="垃圾收集 GC"></a>垃圾收集 GC</h3><p>垃圾回收是导致游戏卡顿的重要原因，然而，在C#中我们没有什么能力对其进行控制。在Profiler中，我们关注分配和回收两个过程，分别为<code>GC.Alloc</code>和<code>GC.Collect</code>.我们可以使用搜索功能查看其过程，以了解回收机制的运行，尽管我们难以对其进行控制。但是我们可以开启incremental GC（增量垃圾回收）来平滑波峰，减少卡顿。<br><img src="https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303052214911.png" alt="image.png"></p>
+<h3 id="进行多帧分析"><a href="#进行多帧分析" class="headerlink" title="进行多帧分析"></a>进行多帧分析</h3><p>尽管了解某一帧的开销十分重要，但是更重要的是了解一段时间内的情况。因此我们可以使用Profile Analyzer对多个帧进行分析。我们可以在package manager中找到它。在其中，我们选中多个帧进行分析，甚至对两个帧序列进行比较分析。</p>
+<h3 id="Freame-Debugger"><a href="#Freame-Debugger" class="headerlink" title="Freame Debugger"></a>Freame Debugger</h3><p>帧调试器允许我们对渲染过程进行有限度的分析。<br>…… 待续</p>
+
+    </div>
+     
+    <div class="post-footer__meta"><p>updated at 2023-05-09</p></div> 
+    <div class="post-meta__cats"><a href="/tags/Unity/" class="post-tags__link button"># Unity</a><a href="/tags/IK/" class="post-tags__link button"># IK</a><a href="/tags/OMC/" class="post-tags__link button"># OMC</a><a href="/tags/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/" class="post-tags__link button"># 性能优化</a></div> 
+</article>
+
+
+    <div class="nav">
+        <div class="nav__prev">
+            
+                <a href="/2023/03/07/Unit%E4%B8%ADLerp%E7%9A%84%E4%BD%BF%E7%94%A8/" class="nav__link">
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M589.088 790.624L310.464 512l278.624-278.624 45.248 45.248L400.96 512l233.376 233.376z" fill="#808080"></path></svg>
+                    </div>
+                    <div>
+                        <div class="nav__label">
+                            Previous Post
+                        </div>
+                        <div class="nav__title">
+                            Lerp的误解和正确使用
+                        </div>
+                    </div>
+                </a>
+            
+        </div>
+        <div class="nav__next">
+            
+                <a href="/2023/03/03/OMC%E8%AE%BA%E6%96%87/" class="nav__link">
+                    <div>
+                        <div class="nav__label">
+                            Next Post
+                        </div>
+                        <div class="nav__title">
+                            OMC
+                        </div>
+                    </div>
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M434.944 790.624l-45.248-45.248L623.04 512l-233.376-233.376 45.248-45.248L713.568 512z" fill="#808080"></path></svg>
+                    </div>
+                </a>
+            
+        </div>
+    </div>
+
+
+
+
+
+</main>
+
+            <footer class="footer">
+    
+
+
+    
+     
+ 
+
+ 
+    
+        
+        <p class="footer-copyright">
+            Copyright © 2023 <a href="/">南方真理会</a>
+        </p>
+    
+    
+    <p>Powered by <a href="https://hexo.io" target="_blank">Hexo</a> | Theme - <a href="https://github.com/ChrAlpha/hexo-theme-cards" target="_blank">Cards</a></p>
+</footer>
+
+        </div>
+         
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+ 
+
+
+    
+ 
+
+
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.css">
+
+    
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.js"></script>
+
+    <script>
+        let lazyloadT = Boolean('false'),
+            auto_fancybox = Boolean('true')
+        if (auto_fancybox) {
+            $(".post__content").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        } else {
+            $(".post__content").find("fancybox").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        }
+    </script>
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+
+    </body>
+</html>

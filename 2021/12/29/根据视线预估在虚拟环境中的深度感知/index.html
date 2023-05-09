@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+
+    
+
+    <!-- 渲染优化 -->
+    <meta name="renderer" content="webkit">
+    <meta name="force-rendering" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="HandheldFriendly" content="True" >
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!--icon-->
+
+    
+        <link rel="shortcut icon" href="/ico.ico">
+    
+    
+        <link rel="icon" type="image/png" sizes="16x16" href="/smallicon.png">
+    
+    
+        <link rel="icon" type="image/png" sizes="32x32" href="/midicon.png">
+    
+    
+        <link rel="apple-touch-icon" sizes="180x180" href="/ico.ico">
+    
+    
+        <link rel="mask-icon" href="/ico.ico">
+    
+
+
+    <!-- meta -->
+
+
+<title>根据视线预估在虚拟环境中的深度感知 | 南方真理会</title>
+
+
+    <meta name="keywords" content="VR, eye-tracking, paper">
+
+
+
+
+    <!-- OpenGraph -->
+ 
+    <meta name="description" content="前言目前有不少在虚拟环境中的深度感知的研究。但是这些研究大多都是通过一些主观的实验来获得相对客观的数据来进行分析。这些研究大多缺乏说服力。比如这篇《Distance perception with a video see-through head-mounted display》。他们研究深度感知的方法居然是使用盲掷的方法来估计受试者的深度感知。很难说这些实验有什么说服力。尽管他们的数据也不错，但">
+<meta property="og:type" content="article">
+<meta property="og:title" content="根据视线预估在虚拟环境中的深度感知">
+<meta property="og:url" content="http://dh224.github.io/2021/12/29/%E6%A0%B9%E6%8D%AE%E8%A7%86%E7%BA%BF%E9%A2%84%E4%BC%B0%E5%9C%A8%E8%99%9A%E6%8B%9F%E7%8E%AF%E5%A2%83%E4%B8%AD%E7%9A%84%E6%B7%B1%E5%BA%A6%E6%84%9F%E7%9F%A5/index.html">
+<meta property="og:site_name" content="南方真理会">
+<meta property="og:description" content="前言目前有不少在虚拟环境中的深度感知的研究。但是这些研究大多都是通过一些主观的实验来获得相对客观的数据来进行分析。这些研究大多缺乏说服力。比如这篇《Distance perception with a video see-through head-mounted display》。他们研究深度感知的方法居然是使用盲掷的方法来估计受试者的深度感知。很难说这些实验有什么说服力。尽管他们的数据也不错，但">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211229171549589.png">
+<meta property="article:published_time" content="2021-12-29T16:11:56.000Z">
+<meta property="article:modified_time" content="2023-05-09T11:04:03.044Z">
+<meta property="article:author" content="dh">
+<meta property="article:tag" content="VR">
+<meta property="article:tag" content="eye-tracking">
+<meta property="article:tag" content="paper">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211229171549589.png">
+
+
+    
+<link rel="stylesheet" href="/style.css">
+ 
+
+    
+    
+        <link rel="stylesheet" id="hl-default-theme" href="/css/highlight/default.css" media="none">
+        
+            <link rel="stylesheet" id="hl-dark-theme" href="/css/highlight/dark.css" media="none">
+        
+    
+
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/style/dark.css">
+
+    
+<script src="/js/darkmode.js"></script>
+
+
+
+     
+
+    <!-- custom head -->
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+    <body>
+        <div id="app">
+            <header class="header">
+    <div class="header__left">
+        <a href="/" class="button">
+            <span class="logo__text">南方真理会</span>
+        </a>
+    </div>
+    <div class="header__right">
+        
+            <div class="navbar__menus">
+                
+                    <a href="/" class="navbar-menu button">首页</a>
+                
+                    <a href="/tags/" class="navbar-menu button">标签</a>
+                
+                    <a href="/archives/" class="navbar-menu button">归档</a>
+                
+            </div>
+        
+        
+        
+
+        
+        
+    <a href="javaScript:void(0);" id="btn-toggle-dark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </a>
+
+
+        
+
+        
+            <a class="dropdown-icon button" id="btn-dropdown" tabindex="0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width='24' height='24' fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path fill="currentColor" d="M3.314,4.8h13.372c0.41,0,0.743-0.333,0.743-0.743c0-0.41-0.333-0.743-0.743-0.743H3.314c-0.41,0-0.743,0.333-0.743,0.743C2.571,4.467,2.904,4.8,3.314,4.8z M16.686,15.2H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,15.2,16.686,15.2z M16.686,9.257H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,9.257,16.686,9.257z"></path></svg></a>
+            <div class="dropdown-menus" id="dropdown-menus">
+                
+                    <a href="/" class="dropdown-menu button">首页</a>
+                
+                    <a href="/tags/" class="dropdown-menu button">标签</a>
+                
+                    <a href="/archives/" class="dropdown-menu button">归档</a>
+                
+            </div>
+        
+    </div>
+</header>
+
+
+            <main class="main">
+    
+
+<div class="post-title">
+    <h1 class="post-title__text">
+        根据视线预估在虚拟环境中的深度感知
+    </h1>
+    <div class="post-title__meta">
+        <a href="/archives/2021/12/" class="post-meta__date button">2021-12-29</a>
+        
+ 
+        
+    
+    
+
+
+ 
+
+ 
+    </div>
+</div>
+
+
+    <aside class="post-side">
+        <div class="post-side__toc">
+            <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BA%E6%96%87%E4%BB%8B%E7%BB%8D"><span class="toc-text">论文介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6%E8%83%8C%E6%99%AF"><span class="toc-text">研究背景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E5%AE%9E%E9%AA%8C"><span class="toc-text">验证实验</span></a></li></ol>
+        </div>
+    </aside>
+    <a class="btn-toc button" id="btn-toc" tabindex="0">
+        <svg viewBox="0 0 1024 1024" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+            <path d="M128 256h64V192H128zM320 256h576V192H320zM128 544h64v-64H128zM320 544h576v-64H320zM128 832h64v-64H128zM320 832h576v-64H320z" fill="currentColor"></path>
+        </svg>
+    </a>
+    <div class="toc-menus" id="toc-menus">
+        <div class="toc-title">Article Directory</div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%BA%E6%96%87%E4%BB%8B%E7%BB%8D"><span class="toc-text">论文介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A0%94%E7%A9%B6%E8%83%8C%E6%99%AF"><span class="toc-text">研究背景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E5%AE%9E%E9%AA%8C"><span class="toc-text">验证实验</span></a></li></ol>
+    </div>
+
+
+<article class="post post__with-toc content-card">
+    <div class="post__header">
+    
+        <div class="post-thumbnail" style="background-image: url('https://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211229171549589.png');"></div>
+    
+
+    <div class="post__expire" id="post-expired-notify">
+        <p>
+            This article was last updated on &lt;span id=&#34;expire-date&#34;&gt;&lt;/span&gt; days ago, the information described in the article may be outdated.
+        </p>
+    </div>
+    <script>
+        (() => {
+            var update = Date.parse("2023-05-09"),
+                date = new Date(),
+                now = date.getTime(),
+                expire = now - update,
+                expire_days = Math.floor(expire/(24*3600*1000));
+            if (expire_days >= 120) {
+                document.querySelectorAll('#expire-date')[0].innerHTML = expire_days;
+                document.querySelectorAll('#post-expired-notify')[0].style.display = 'block';
+            }
+        })();
+    </script>
+</div>
+    <div class="post__content">
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>目前有不少在虚拟环境中的深度感知的研究。但是这些研究大多都是通过一些<em>主观</em>的实验来获得相对<em>客观</em>的数据来进行分析。这些研究大多缺乏说服力。<br>比如这篇《Distance perception with a video see-through head-mounted display》。他们研究深度感知的方法居然是使用盲掷的方法来估计受试者的深度感知。很难说这些实验有什么说服力。尽管他们的数据也不错，但是这是通过大量的人（20+)和大量的时间才能规避掉相对主观的数据。总之就是相对麻烦。<br>我前段时间看到了名为《Perceptual self‑position estimation based on gaze tracking in virtual reality》的论文。该论文提出了一种不依赖受试者主观感受的基于深度感知的自我定位方法。这种方法大约就是分别获得左右眼的视线，随后将获取视线的公垂线的中点作为估计的视线焦点。由此计算出的焦点距离就是感知的深度。通过这种方法计算出来的深度是可以量化的，以后多数的研究就不再需要通过丢沙包等主观实验的方法来获得深度感知的数据了。</p>
+<p>由于组会的原因，我需要作这篇论文的报告。于是为了让我的工作量看上去大一点。因此，我想要使用论文中提到的算法进行一些分析。毕竟在我粗略的观察下，这个方法似乎并不难。</p>
+<p>尽管论文中提到了一些有关相机标定的知识，而且其作用仅仅是用来估计虚拟目标的位置。这种估计似乎完全没有意义。因此在虚拟世界中，对于目标和自身的空间坐标完全是已知的，并没有什么估计的需求。但论文作者仍然用了估计的方法，并且还会进一步造成误差。不知道他们是何用意。总之，接下去我先大致介绍一下这篇论文。随后给出我的实现和实验。</p>
+<h2 id="论文介绍"><a href="#论文介绍" class="headerlink" title="论文介绍"></a>论文介绍</h2><p>这篇论文<strong>Perceptual self‑position estimation based on gaze tracking in virtual reality</strong>发布于2021年的Virtual Reality。似乎是2区的期刊。</p>
+<h3 id="研究背景"><a href="#研究背景" class="headerlink" title="研究背景"></a>研究背景</h3><p>在虚拟环境(VE)中，虚拟相机可以模拟用户的眼睛，获取画面，并通过左右双屏显示在用户眼前。理论上，虚拟相机的各类参数应该与人眼相同，而且显示器显示的立体画面应当显示所需的深度信息。即：人类视觉系统(HVS)的深度感知在VR环境中保持不变。</p>
+<p>然而，由于技术所限，每个用户的眼睛状态不同，显示无法还原所有的深度信息。导致在VR环境中，深度感知存在偏差。目前除了专门研究深度感知的研究，大部分的工作都没有考虑感知深度和实际深度之间的差异。即便是研究深度感知的相关论文，他们大部分也还是依靠被试者的主观判断来获得实验数据。</p>
+<p>比如之前提到的《Distance perception with a video see-through head-mounted display》。就是通过盲掷的手法来间接衡量深度感知的。这种实验耗时耗力，而且缺乏说服力。</p>
+<p>已经有不少的研究者发现，用户在虚拟环境中普遍低估了深度。比如Pollock等人的工作就认为，用户在虚拟环境中的深度感知是实际距离的50~80%[1]，Kelly等人的工作也支持这一结论，他们的结果是71%[2]。</p>
+<p>给本文的研究者提供较大帮助的是Mujahidin等人的研究[3]。他们提出了一种通过视线相交来估计视线深度的方法。视线的相交是通过估计3D空间中左眼和右眼视线之间最近线段（中垂线）的中点来实现的。</p>
+<p>如下图所示：<br>$$<br>P^W表示用户在真实空间中的位置。<br>P^V 表示虚拟空间中的虚拟相机位置,代表用户的眼睛.<br>E^V 代表眼睛中心.<br>由于在虚拟环境中的深度感知会出现偏差,因此用P_H^V来表示虚拟环境中的位置.<br>本文提出的方法旨在计算出准确的P_H^V 来代替P^V ，减少深度感知误差带来的不适感。<br>$$</p>
+<p><img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211229165436049.png" alt="image-20211229165436049"></p>
+<p>该文的研究前提是真实空间和虚拟空间进行Mapping是绝对准确的。</p>
+<p><img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211229165636913.png" alt="image-20211229165636913"></p>
+<h2 id=""><a href="#" class="headerlink" title=""></a><img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211229165710454.png" alt="image-20211229165710454"></h2><p><img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211229165722739.png" alt="image-20211229165722739"></p>
+<p><img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211229165733675.png" alt="image-20211229165733675"></p>
+<p>为了省事我就直接放PPT的截图了。</p>
+<h2 id="验证实验"><a href="#验证实验" class="headerlink" title="验证实验"></a>验证实验</h2><p>在了解该方法后，我就打算先写个小实验来证明它。但是第一步就是要获得双眼的视线。我一开始在HTC VIVE EYE PRO官方提供的SDK文档中进行了查找，找到了视线的数据。但是这个视线的数据是双眼混合的，尽管数据里面有左右眼各自的视线数据，但是我却不会写。不过我经过一番查找，在官方论坛的一个Bug报告帖中，看到某人为了说明官方插件中双目视线存在Bug而写的代码。这段代码恰好能够可视化双眼的视线。这帮了我大忙，可以说该实验完成了大部分。接下去就是根据论文中的方法来算出空间直线的公垂线的中点了。</p>
+<p>这也是比较困难的。一开始我试图自己写。但是编码能力不过关。导致我虽然看到了数学的解法，但是无法用编程的方法写出来。后来经过一番查找，发现C++的一个开源库中提供了这个方法。因此我直接将C++代码转写成C#代码，经实验。确实可行。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">public void lineToLineSegment(Vector3 linea,Vector3 pointInA,Vector3 lineb,Vector3 pointInB,out Vector3 pointA,out Vector3 pointB)&#123;</span><br><span class="line">        Vector4 pa = new Vector4(0f, 0f, 0f,0f);</span><br><span class="line">        Vector4 pb = new Vector4(0f, 0f, 0f,0f);</span><br><span class="line">        Vector4 dir1 =new Vector4(0f, 0f, 0f,0f);</span><br><span class="line">        pa.x = pointInA.x;</span><br><span class="line">        pa.y = pointInA.y;</span><br><span class="line">        pa.z = pointInA.z;</span><br><span class="line">        dir1.Set(linea.x,linea.y,linea.z,0);</span><br><span class="line">        pb = pa + dir1;</span><br><span class="line">        Vector4 qa =new Vector4(0f, 0f, 0f,0f); </span><br><span class="line">        Vector4 qb = new Vector4(0f, 0f, 0f,0f);</span><br><span class="line">        Vector4 dir2 = new Vector4(0f, 0f, 0f,0f);</span><br><span class="line">        qa.Set(pointInB.x,pointInB.y,pointInB.z,0);</span><br><span class="line">        dir2.Set(lineb.x,lineb.y,lineb.z,0);</span><br><span class="line">        qb = qa + dir2;</span><br><span class="line"></span><br><span class="line">        Vector4 u = dir1;</span><br><span class="line">        Vector4 v = dir2;</span><br><span class="line">        Vector4 w = pb - qa;</span><br><span class="line"></span><br><span class="line">        float a = Vector4.Dot(u, u);</span><br><span class="line">        float b = Vector4.Dot(u, v); </span><br><span class="line">        float c = Vector4.Dot(v, v);</span><br><span class="line">        float d = Vector4.Dot(u, w);</span><br><span class="line">        float e = Vector4.Dot(v, w);</span><br><span class="line">        float denominator = a * c - b * b;</span><br><span class="line">        float sc, tc;</span><br><span class="line">        if (denominator &lt; 1e-5)          // The lines are almost parallel</span><br><span class="line">        &#123;</span><br><span class="line">            sc = 0.0f;</span><br><span class="line">            tc = (b &gt; c ? d / b : e / c);  // Use the largest denominator</span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            sc = (b*e - c*d) / denominator;</span><br><span class="line">            tc = (a*e - b*d) / denominator;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        pointA = new Vector4(0, 0, 0, 0);</span><br><span class="line">        pointA =  pb+ sc * u;</span><br><span class="line">        pointB = new Vector3(0, 0, 0);</span><br><span class="line">        pointB = qa + tc * v;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>总之，以上就是编码上遇到的问题了。随后我做了点小实验来验证该方法的可行性。</p>
+<p>我先是设计了如下图的三个场景，用来表示无深度线索的深度感知、有深度线索的深度感知、将距离腿远后的深度感知情况。其中，将深度推远的意义在于，尽管我们算出了深度差，但是由于现实世界和虚拟世界的角色位置是映射起来的。如果我们直接将虚拟人物向前平移来减少深度感知的误差，那么反而会造成更大的不适感。因此，可以反向思考，即将物体推远。即虚拟世界中的1.4M  = 1M 。通过这种方式来缓解不适感。理论上，这种方法会有用。论文的作者的数据也显示，推远距离后不适感降低了。但是我的验证实验却没有得到类似的结果。或者说几乎没影响。</p>
+<p><img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211229171051455.png" alt="image-20211229171051455"></p>
+<p>我带着头盔盯着红色的方块，然后记录下所有的感知距离。当然，我直接排除掉了一些很明显错误的数据来减少误差。本文作者是通过凝视时间来排除误差的，我懒得做了。</p>
+<p>再获得数据后，我再把每个数据都画出图表。如下图。</p>
+<p><img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211229171223015.png" alt="image-20211229171223015"></p>
+<p><img src="https://satt.oss-cn-hangzhou.aliyuncs.com/img/image-20211229171234446.png" alt="image-20211229171234446"></p>
+<p>可以发现，在有深度线索的情况下，确实深度感知的误差会减少。但是推远物体后，提升并不明显。知识从77.32%提升到了80.22%。实际差距更是直接吊打了67.48%。不知道这种情况是什么原因。</p>
+<p>还有，从记录下来的数据可以发现，我的视线交点似乎已知在移动，而且变化的还挺剧烈的。这也许是因为我在做实验的时候仍然能够看到可视化的双眼实现和中垂线。导致我下意识地聚焦在这些线条上导致的错误数据。</p>
+<p>总之，这个实验还有可以改进的地方。这个方法似乎确实可以用来客观衡量深度感知。只是能否将其用上就是一个未知数了。</p>
+
+    </div>
+     
+    <div class="post-footer__meta"><p>updated at 2023-05-09</p></div> 
+    <div class="post-meta__cats"><a href="/tags/VR/" class="post-tags__link button"># VR</a><a href="/tags/eye-tracking/" class="post-tags__link button"># eye-tracking</a><a href="/tags/paper/" class="post-tags__link button"># paper</a></div> 
+</article>
+
+
+    <div class="nav">
+        <div class="nav__prev">
+            
+                <a href="/2022/06/13/%E5%9B%9E%E5%90%88%E5%88%B6%E6%B8%B8%E6%88%8F%E4%B8%AD%E7%9A%84%E5%AF%BB%E8%B7%AF%E4%BB%A5%E5%8F%8A%E6%98%BE%E7%A4%BA%E7%A7%BB%E5%8A%A8%E8%8C%83%E5%9B%B4/" class="nav__link">
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M589.088 790.624L310.464 512l278.624-278.624 45.248 45.248L400.96 512l233.376 233.376z" fill="#808080"></path></svg>
+                    </div>
+                    <div>
+                        <div class="nav__label">
+                            Previous Post
+                        </div>
+                        <div class="nav__title">
+                            回合制游戏中的寻路以及显示移动范围
+                        </div>
+                    </div>
+                </a>
+            
+        </div>
+        <div class="nav__next">
+            
+                <a href="/2021/12/06/%E4%BD%BF%E7%94%A8Arcgis-for-js%E7%94%BB%E5%87%BA%E5%AF%86%E6%8E%A5%E4%BA%BA%E7%BE%A4%E7%A7%BB%E5%8A%A8%E8%BD%A8%E8%BF%B9%E5%9B%BE/" class="nav__link">
+                    <div>
+                        <div class="nav__label">
+                            Next Post
+                        </div>
+                        <div class="nav__title">
+                            使用Arcgis for js画出密接人群移动轨迹图
+                        </div>
+                    </div>
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M434.944 790.624l-45.248-45.248L623.04 512l-233.376-233.376 45.248-45.248L713.568 512z" fill="#808080"></path></svg>
+                    </div>
+                </a>
+            
+        </div>
+    </div>
+
+
+
+
+
+</main>
+
+            <footer class="footer">
+    
+
+
+    
+     
+ 
+
+ 
+    
+        
+        <p class="footer-copyright">
+            Copyright © 2023 <a href="/">南方真理会</a>
+        </p>
+    
+    
+    <p>Powered by <a href="https://hexo.io" target="_blank">Hexo</a> | Theme - <a href="https://github.com/ChrAlpha/hexo-theme-cards" target="_blank">Cards</a></p>
+</footer>
+
+        </div>
+         
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+ 
+
+
+    
+ 
+
+
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.css">
+
+    
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.js"></script>
+
+    <script>
+        let lazyloadT = Boolean('false'),
+            auto_fancybox = Boolean('true')
+        if (auto_fancybox) {
+            $(".post__content").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        } else {
+            $(".post__content").find("fancybox").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        }
+    </script>
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+
+    </body>
+</html>

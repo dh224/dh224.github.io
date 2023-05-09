@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+
+    
+
+    <!-- 渲染优化 -->
+    <meta name="renderer" content="webkit">
+    <meta name="force-rendering" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="HandheldFriendly" content="True" >
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!--icon-->
+
+    
+        <link rel="shortcut icon" href="/ico.ico">
+    
+    
+        <link rel="icon" type="image/png" sizes="16x16" href="/smallicon.png">
+    
+    
+        <link rel="icon" type="image/png" sizes="32x32" href="/midicon.png">
+    
+    
+        <link rel="apple-touch-icon" sizes="180x180" href="/ico.ico">
+    
+    
+        <link rel="mask-icon" href="/ico.ico">
+    
+
+
+    <!-- meta -->
+
+
+<title>Lerp的误解和正确使用 | 南方真理会</title>
+
+
+    <meta name="keywords" content="Unity, IK, OMC">
+
+
+
+
+    <!-- OpenGraph -->
+ 
+    <meta name="description" content="Lerp的误解和正确使用Unity中由于Lerp方法用于在两个值之间进行线性插值，但是常见的用法往往是错误的。比如该例使用Lerp旋转的用法： 12345678910using UnityEngine;using System.Collections;public class ExampleClass : MonoBehaviour ｛    public Transform from;    p">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lerp的误解和正确使用">
+<meta property="og:url" content="http://dh224.github.io/2023/03/07/Unit%E4%B8%ADLerp%E7%9A%84%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="南方真理会">
+<meta property="og:description" content="Lerp的误解和正确使用Unity中由于Lerp方法用于在两个值之间进行线性插值，但是常见的用法往往是错误的。比如该例使用Lerp旋转的用法： 12345678910using UnityEngine;using System.Collections;public class ExampleClass : MonoBehaviour ｛    public Transform from;    p">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303071048386.png">
+<meta property="article:published_time" content="2023-03-07T10:43:46.000Z">
+<meta property="article:modified_time" content="2023-05-09T11:04:03.044Z">
+<meta property="article:author" content="dh">
+<meta property="article:tag" content="Unity">
+<meta property="article:tag" content="IK">
+<meta property="article:tag" content="OMC">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303071048386.png">
+
+
+    
+<link rel="stylesheet" href="/style.css">
+ 
+
+    
+    
+        <link rel="stylesheet" id="hl-default-theme" href="/css/highlight/default.css" media="none">
+        
+            <link rel="stylesheet" id="hl-dark-theme" href="/css/highlight/dark.css" media="none">
+        
+    
+
+    
+    
+
+    
+    
+<link rel="stylesheet" href="/css/style/dark.css">
+
+    
+<script src="/js/darkmode.js"></script>
+
+
+
+     
+
+    <!-- custom head -->
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+    <body>
+        <div id="app">
+            <header class="header">
+    <div class="header__left">
+        <a href="/" class="button">
+            <span class="logo__text">南方真理会</span>
+        </a>
+    </div>
+    <div class="header__right">
+        
+            <div class="navbar__menus">
+                
+                    <a href="/" class="navbar-menu button">首页</a>
+                
+                    <a href="/tags/" class="navbar-menu button">标签</a>
+                
+                    <a href="/archives/" class="navbar-menu button">归档</a>
+                
+            </div>
+        
+        
+        
+
+        
+        
+    <a href="javaScript:void(0);" id="btn-toggle-dark">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </a>
+
+
+        
+
+        
+            <a class="dropdown-icon button" id="btn-dropdown" tabindex="0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width='24' height='24' fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round"><path fill="currentColor" d="M3.314,4.8h13.372c0.41,0,0.743-0.333,0.743-0.743c0-0.41-0.333-0.743-0.743-0.743H3.314c-0.41,0-0.743,0.333-0.743,0.743C2.571,4.467,2.904,4.8,3.314,4.8z M16.686,15.2H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,15.2,16.686,15.2z M16.686,9.257H3.314c-0.41,0-0.743,0.333-0.743,0.743s0.333,0.743,0.743,0.743h13.372c0.41,0,0.743-0.333,0.743-0.743S17.096,9.257,16.686,9.257z"></path></svg></a>
+            <div class="dropdown-menus" id="dropdown-menus">
+                
+                    <a href="/" class="dropdown-menu button">首页</a>
+                
+                    <a href="/tags/" class="dropdown-menu button">标签</a>
+                
+                    <a href="/archives/" class="dropdown-menu button">归档</a>
+                
+            </div>
+        
+    </div>
+</header>
+
+
+            <main class="main">
+    
+
+<div class="post-title">
+    <h1 class="post-title__text">
+        Lerp的误解和正确使用
+    </h1>
+    <div class="post-title__meta">
+        <a href="/archives/2023/03/" class="post-meta__date button">2023-03-07</a>
+        
+ 
+        
+    
+    
+
+
+ 
+
+ 
+    </div>
+</div>
+
+
+    <aside class="post-side">
+        <div class="post-side__toc">
+            <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Lerp%E7%9A%84%E8%AF%AF%E8%A7%A3%E5%92%8C%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8"><span class="toc-text">Lerp的误解和正确使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E5%8A%A8%E7%94%BB%E6%9B%B2%E7%BA%BF%E5%AE%9E%E7%8E%B0"><span class="toc-text">利用动画曲线实现</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-text">参考</span></a></li></ol>
+        </div>
+    </aside>
+    <a class="btn-toc button" id="btn-toc" tabindex="0">
+        <svg viewBox="0 0 1024 1024" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+            <path d="M128 256h64V192H128zM320 256h576V192H320zM128 544h64v-64H128zM320 544h576v-64H320zM128 832h64v-64H128zM320 832h576v-64H320z" fill="currentColor"></path>
+        </svg>
+    </a>
+    <div class="toc-menus" id="toc-menus">
+        <div class="toc-title">Article Directory</div>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Lerp%E7%9A%84%E8%AF%AF%E8%A7%A3%E5%92%8C%E6%AD%A3%E7%A1%AE%E4%BD%BF%E7%94%A8"><span class="toc-text">Lerp的误解和正确使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E5%8A%A8%E7%94%BB%E6%9B%B2%E7%BA%BF%E5%AE%9E%E7%8E%B0"><span class="toc-text">利用动画曲线实现</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-text">参考</span></a></li></ol>
+    </div>
+
+
+<article class="post post__with-toc content-card">
+    <div class="post__header">
+    
+        <div class="post-thumbnail" style="background-image: url('https://ob-1253229442.cos.ap-shanghai.myqcloud.com/ob/202303071048386.png');"></div>
+    
+
+    <div class="post__expire" id="post-expired-notify">
+        <p>
+            This article was last updated on &lt;span id=&#34;expire-date&#34;&gt;&lt;/span&gt; days ago, the information described in the article may be outdated.
+        </p>
+    </div>
+    <script>
+        (() => {
+            var update = Date.parse("2023-05-09"),
+                date = new Date(),
+                now = date.getTime(),
+                expire = now - update,
+                expire_days = Math.floor(expire/(24*3600*1000));
+            if (expire_days >= 120) {
+                document.querySelectorAll('#expire-date')[0].innerHTML = expire_days;
+                document.querySelectorAll('#post-expired-notify')[0].style.display = 'block';
+            }
+        })();
+    </script>
+</div>
+    <div class="post__content">
+        <h3 id="Lerp的误解和正确使用"><a href="#Lerp的误解和正确使用" class="headerlink" title="Lerp的误解和正确使用"></a>Lerp的误解和正确使用</h3><p>Unity中由于<code>Lerp</code>方法用于在两个值之间进行线性插值，但是常见的用法往往是错误的。比如该例<a target="_blank" rel="noopener" href="https://gwb.tencent.com/community/detail/127454">使用Lerp旋转的用法</a>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">using UnityEngine;</span><br><span class="line">using System.Collections;</span><br><span class="line">public class ExampleClass : MonoBehaviour ｛</span><br><span class="line">    public Transform from;</span><br><span class="line">    public Transform to;</span><br><span class="line">    public float speed = 0.1F;</span><br><span class="line">    void Update() ｛</span><br><span class="line">       transform.rotation = Quaternion.Lerp(from.rotation, to.rotation, Time.time * speed);</span><br><span class="line">    ｝</span><br><span class="line">｝</span><br></pre></td></tr></table></figure>
+<p>实际上，作者也指出该方法存在以下三个问题，</p>
+<ol>
+<li> 这样的旋转不是匀速的旋转，这种是逐渐减速的旋转。</li>
+<li> 永远无法旋转到目标角度，可以无限的接近。</li>
+<li> 旋转速度与帧数相关，请注意from.rotation在变化，举例来说单位时间内移动2次2%和移动1次4%并不相同。</li>
+</ol>
+<p>想要正确使用Lerp(线性插值），我们需要预先保存起始阶段和目标阶段的角度、位置等，取决于我们如何使用Lerp。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">private Vector3 endPosition = new Vector3(1f,1f,1f);</span><br><span class="line">private Vector3 startPosition;</span><br><span class="line">private float desireDuration = 3f;</span><br><span class="line">private float elapsedTime;</span><br><span class="line">void Start()&#123;</span><br><span class="line">	startPosition = transform.position; // 需要预先存储起始位置</span><br><span class="line">&#125;</span><br><span class="line">void Update()&#123;</span><br><span class="line">	elapsedTime += Time.deltaTime;</span><br><span class="line">	float percentageComplete = elapsedTime / desireDuration;</span><br><span class="line">	transfrom.position = Vector3.Lerp(startPosition, endPosition, percentageComplete);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用以上代码就能够正确使用Lerp进行线性插值了。可见其要点在于不要在插值过程中输入改变后的起始位置。许多人使用实时更新的起始位置，目的是为了实现逐渐减速的移动过程，尽管肉眼上是可行的，但会面临前例出现的<strong>三个问题</strong>，即不是匀速转动——这是可以我们的目的，永远无法到达目标位置/角度——这是一个隐藏的问题，往往需要进行额外的判定，比如，当位置与目标位置的差值小于某阈值后停止插值等，实际上让代码变得更加复杂了。旋转速度与帧数相关——同样是个问题，特别是面临高性能机器的时候。<br>实际上，我们可以用以下的方法实现逐渐减速的移动、旋转效果:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">transfrom.position = Vector3.Lerp(startPosition, endPosition, Mathf.SmoothStep(0, 1, percentageComplete));</span><br></pre></td></tr></table></figure>
+<p>在这里，我们使用了Mathf.SmoothStep()方法来让平滑我们的percentageComplete变量，我们可以选用任何我们想要的方法，比如<code>Math.pow(percentage, 0.5)</code>。通过这种方法实现的旋转和平移不受帧率的影响，并且更加可靠。</p>
+<h4 id="利用动画曲线实现"><a href="#利用动画曲线实现" class="headerlink" title="利用动画曲线实现"></a>利用动画曲线实现</h4><p>为了实现更加可控的曲线，我们可以使用动画曲线。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[SerializeField] private AnimationCurve curve; // 我们只需要在编辑器中设定该值即可。</span><br></pre></td></tr></table></figure>
+<p>同时将Lerp的输入修改为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">transfrom.position = Vector3.Lerp(startPosition, endPosition, curve.Evaluate(percentageComplete));</span><br></pre></td></tr></table></figure>
+<p>即可实现功能。<br>#Unit #Lerp </p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=MyVY-y_jK1I">https://www.youtube.com/watch?v=MyVY-y_jK1I</a><br><a target="_blank" rel="noopener" href="https://www.blueraja.com/blog/404/how-to-use-unity-3ds-linear-interpolation-vector3-lerp-correctly">blueraja.com/blog/404/how-to-use-unity-3ds-linear-interpolation-vector3-lerp-correctly</a></p>
+
+    </div>
+     
+    <div class="post-footer__meta"><p>updated at 2023-05-09</p></div> 
+    <div class="post-meta__cats"><a href="/tags/Unity/" class="post-tags__link button"># Unity</a><a href="/tags/IK/" class="post-tags__link button"># IK</a><a href="/tags/OMC/" class="post-tags__link button"># OMC</a></div> 
+</article>
+
+
+    <div class="nav">
+        <div class="nav__prev">
+            
+        </div>
+        <div class="nav__next">
+            
+                <a href="/2023/03/04/Unity%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E2%80%94%E2%80%94Unity%20Profiler%E5%88%9D%E6%8E%A2/" class="nav__link">
+                    <div>
+                        <div class="nav__label">
+                            Next Post
+                        </div>
+                        <div class="nav__title">
+                            Unity性能优化——Unity Profiler初探
+                        </div>
+                    </div>
+                    <div>
+                        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path d="M434.944 790.624l-45.248-45.248L623.04 512l-233.376-233.376 45.248-45.248L713.568 512z" fill="#808080"></path></svg>
+                    </div>
+                </a>
+            
+        </div>
+    </div>
+
+
+
+
+
+</main>
+
+            <footer class="footer">
+    
+
+
+    
+     
+ 
+
+ 
+    
+        
+        <p class="footer-copyright">
+            Copyright © 2023 <a href="/">南方真理会</a>
+        </p>
+    
+    
+    <p>Powered by <a href="https://hexo.io" target="_blank">Hexo</a> | Theme - <a href="https://github.com/ChrAlpha/hexo-theme-cards" target="_blank">Cards</a></p>
+</footer>
+
+        </div>
+         
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+ 
+
+
+    
+ 
+
+
+    
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.css">
+
+    
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.4.1/dist/jquery.fancybox.min.js"></script>
+
+    <script>
+        let lazyloadT = Boolean('false'),
+            auto_fancybox = Boolean('true')
+        if (auto_fancybox) {
+            $(".post__content").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        } else {
+            $(".post__content").find("fancybox").find('img').each(function () {
+                var element = document.createElement("a");
+                $(element).attr("data-fancybox", "gallery");
+                $(element).attr("href", $(this).attr("src"));
+                if (lazyloadT) {
+                    $(element).attr("href", $(this).attr("data-srcset"));
+                }
+                $(this).wrap(element);
+            });
+        }
+    </script>
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+
+    </body>
+</html>
